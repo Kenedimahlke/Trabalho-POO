@@ -1,8 +1,10 @@
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 // Classe que representa uma meta financeira
-public class Meta {
+public class Meta implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private Categoria categoria;
     private double valorAlvo;
@@ -27,6 +29,9 @@ public class Meta {
     
     // Atualiza o progresso da meta
     public void atualizarProgresso(double valor) {
+        if (valor < 0) {
+            return; // Ignora valor negativo ou lança exceção? Teste espera que saldo não mude.
+        }
         this.valorAtual += valor;
         
         if (valorAtual >= valorAlvo) {
@@ -89,6 +94,19 @@ public class Meta {
         return sb.toString();
     }
     
+    // Métodos para compatibilidade com Main
+    public String getDescricao() { return nome; }
+    public double calcularProgresso() { return getPercentualConcluido(); }
+    public void contribuir(double valor) { atualizarProgresso(valor); }
+    public boolean isConcluida() { return isAlcancada(); }
+    public String verificarStatus() {
+        if (isAlcancada()) return "CONCLUIDA";
+        if (isAtrasada()) return "ATRASADA";
+        return "PENDENTE";
+    }
+    public Usuario getUsuario() { return responsavel; }
+    public LocalDate getDataLimite() { return prazo; }
+
     // GETTERS
     public String getNome() { return nome; }
     public Categoria getCategoria() { return categoria; }

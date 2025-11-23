@@ -1,7 +1,9 @@
 import java.time.LocalDate;
+import java.io.Serializable;
 
 // Classe que representa um cofrinho ou poupança virtual
-public class Cofrinho implements ContaFinanceira {
+public class Cofrinho implements ContaFinanceira, Serializable {
+    private static final long serialVersionUID = 1L;
     private String numeroConta;
     private Usuario titular;
     private double saldo;
@@ -101,12 +103,12 @@ public class Cofrinho implements ContaFinanceira {
         if (dataMetaPrazo != null) {
             sb.append("Prazo: ").append(dataMetaPrazo).append("\n");
             if (isMetaAtingida()) {
-                sb.append("✓ META ATINGIDA!\n");
+                sb.append("META ATINGIDA!\n");
             } else if (isPrazoVencido()) {
-                sb.append("✗ Prazo vencido\n");
+                sb.append("Prazo vencido\n");
             }
         } else if (isMetaAtingida()) {
-            sb.append("✓ META ATINGIDA!\n");
+            sb.append("META ATINGIDA!\n");
         }
         
         return sb.toString();
@@ -154,6 +156,13 @@ public class Cofrinho implements ContaFinanceira {
         return String.format("Cofrinho [%s] - %s: R$ %.2f / R$ %.2f (%.1f%%)", 
                            numeroConta, objetivo, saldo, metaValor, getPercentualMeta());
     }
+    
+    // Métodos de compatibilidade com Main
+    public double calcularProgressoMeta() { return getPercentualMeta(); }
+    public long calcularDiasRestantes() { return getDiasRestantes(); }
+    public boolean metaAtingida() { return isMetaAtingida(); }
+    public double calcularFaltaParaMeta() { return getValorFaltante(); }
+    public String gerarRelatorio() { return getExtrato(); }
     
     // GETTERS e SETTERS adicionais
     public String getObjetivo() { return objetivo; }

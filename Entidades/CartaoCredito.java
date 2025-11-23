@@ -1,7 +1,9 @@
 import java.time.LocalDate;
+import java.io.Serializable;
 
 // Classe que representa um Cartão de Crédito
-public class CartaoCredito implements ContaFinanceira {
+public class CartaoCredito implements ContaFinanceira, Serializable {
+    private static final long serialVersionUID = 1L;
     
     private String numeroConta;
     private Usuario titular;

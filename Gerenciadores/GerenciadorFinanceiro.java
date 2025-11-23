@@ -3,21 +3,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 // Singleton - Gerenciador central do sistema financeiro
-public class GerenciadorFinanceiro {
+// REFATORADO: Aplicando SRP - responsabilidade única de coordenar repositórios
+public class GerenciadorFinanceiro implements Subject {
     private static GerenciadorFinanceiro instancia;
-    private List<Usuario> usuarios;
-    private List<Transacao> transacoes;
-    private List<Meta> metas;
-    private List<ContaFinanceira> contas;
-    private List<Orcamento> orcamentos;
+    
+    // Aplicando DIP: Dependência de abstrações (interfaces)
+    private final RepositorioDados<Usuario> repositorioUsuarios;
+    private final RepositorioDados<ContaFinanceira> repositorioContas;
+    private final RepositorioDados<Transacao> repositorioTransacoes;
+    private final RepositorioDados<Meta> repositorioMetas;
+    private final RepositorioDados<Orcamento> repositorioOrcamentos;
+    
+    private List<Observer> observadores;
     
     // CONSTRUTOR privado (Singleton)
     private GerenciadorFinanceiro() {
-        usuarios = new ArrayList<>();
-        transacoes = new ArrayList<>();
-        metas = new ArrayList<>();
-        contas = new ArrayList<>();
-        orcamentos = new ArrayList<>();
+        // Injeção de dependência via construtor (pode ser via parâmetro também)
+        this.repositorioUsuarios = new RepositorioUsuarios();
+        this.repositorioContas = new RepositorioContas();
+        this.repositorioTransacoes = new RepositorioTransacoes();
+        this.repositorioMetas = new RepositorioMetas();
+        this.repositorioOrcamentos = new RepositorioOrcamentos();
+        this.observadores = new ArrayList<>();
     }
     
     // Método para obter a instância única
@@ -28,107 +35,152 @@ public class GerenciadorFinanceiro {
         return instancia;
     }
     
-    // === MÉTODOS DE USUÁRIO ===
+    // MÉTODOS DE USUÁRIO - Delegando para o repositório (SRP)
     public void adicionarUsuario(Usuario usuario) {
-        if (usuario != null && !usuarios.contains(usuario)) {
-            usuarios.add(usuario);
-        }
+        repositorioUsuarios.adicionar(usuario);
+        notificarObservadores("USUARIO_CADASTRADO", usuario);
+    }
+    
+    public Usuario buscarUsuarioPorId(String id) {
+        return repositorioUsuarios.buscarPorId(id);
     }
     
     public Usuario buscarUsuarioPorEmail(String email) {
-        return usuarios.stream()
-            .filter(u -> u.getEmail().equalsIgnoreCase(email))
-            .findFirst()
-            .orElse(null);
+        if (repositorioUsuarios instanceof RepositorioUsuarios) {
+            return ((RepositorioUsuarios) repositorioUsuarios).buscarPorEmail(email);
+        }
+        return null;
     }
     
     public List<Usuario> getUsuarios() {
-        return new ArrayList<>(usuarios);
+        return repositorioUsuarios.listarTodos();
     }
     
-    // === MÉTODOS DE TRANSAÇÃO ===
-    public void adicionarTransacao(Transacao transacao) {
-        if (transacao != null) {
-            transacoes.add(transacao);
+    // MÉTODOS DO PADRÃO OBSERVER
+    @Override
+    public void adicionarObservador(Observer observer) {
+        if (observer != null && !observadores.contains(observer)) {
+            observadores.add(observer);
         }
+    }
+    
+    @Override
+    public void removerObservador(Observer observer) {
+        observadores.remove(observer);
+    }
+    
+    @Override
+    public void notificarObservadores(String evento, Object dados) {
+        for (Observer observer : observadores) {
+            observer.atualizar(evento, dados);
+        }
+    }
+    
+    @Override
+    public List<Observer> getObservadores() {
+        return new ArrayList<>(observadores);
+    }
+    
+    // MÉTODOS DE TRANSAÇÃO - Delegando para o repositório (SRP)
+    public void adicionarTransacao(Transacao transacao) {
+        repositorioTransacoes.adicionar(transacao);
+        // Notificar observadores
+        notificarObservadores("Nova Transação: " + transacao.getTipo(),
+            String.format("R$ %.2f - %s", transacao.getValor(), transacao.getDescricao()));
     }
     
     public List<Transacao> getTransacoes() {
-        return new ArrayList<>(transacoes);
+        return repositorioTransacoes.listarTodos();
     }
     
     public List<Transacao> getTransacoesDoUsuario(Usuario usuario) {
-        return transacoes.stream()
-            .filter(t -> t.getPagador().equals(usuario))
-            .collect(Collectors.toList());
+        if (repositorioTransacoes instanceof RepositorioTransacoes) {
+            // Busca por conta do usuário
+            return repositorioTransacoes.listarTodos().stream()
+                .filter(t -> t.getConta().getTitular().equals(usuario))
+                .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
     
     public List<Transacao> getTransacoesPorTipo(TipoTransacao tipo) {
-        return transacoes.stream()
-            .filter(t -> t.getTipo() == tipo)
-            .collect(Collectors.toList());
+        if (repositorioTransacoes instanceof RepositorioTransacoes) {
+            return ((RepositorioTransacoes) repositorioTransacoes).buscarPorTipo(tipo);
+        }
+        return new ArrayList<>();
     }
     
     public List<Transacao> getTransacoesPorCategoria(Categoria categoria) {
-        return transacoes.stream()
-            .filter(t -> t.getCategoria() == categoria)
-            .collect(Collectors.toList());
+        if (repositorioTransacoes instanceof RepositorioTransacoes) {
+            return ((RepositorioTransacoes) repositorioTransacoes).buscarPorCategoria(categoria);
+        }
+        return new ArrayList<>();
     }
     
-    // === MÉTODOS DE META ===
+    // MÉTODOS DE META - Delegando para o repositório (SRP)
     public void adicionarMeta(Meta meta) {
-        if (meta != null) {
-            metas.add(meta);
-        }
+        repositorioMetas.adicionar(meta);
+        // Notificar observadores
+        notificarObservadores("Nova Meta Criada",
+            meta.getDescricao() + " - R$ " + String.format("%.2f", meta.getValorAlvo()));
     }
     
     public List<Meta> getMetas() {
-        return new ArrayList<>(metas);
+        return repositorioMetas.listarTodos();
     }
     
     public List<Meta> getMetasDoUsuario(Usuario usuario) {
-        return metas.stream()
-            .filter(m -> m.getResponsavel().equals(usuario))
-            .collect(Collectors.toList());
+        if (repositorioMetas instanceof RepositorioMetas) {
+            return ((RepositorioMetas) repositorioMetas).buscarPorUsuario(usuario);
+        }
+        return new ArrayList<>();
     }
     
     public List<Meta> getMetasAtrasadas() {
-        return metas.stream()
-            .filter(Meta::isAtrasada)
-            .collect(Collectors.toList());
+        if (repositorioMetas instanceof RepositorioMetas) {
+            return ((RepositorioMetas) repositorioMetas).buscarAtrasadas();
+        }
+        return new ArrayList<>();
     }
     
     public List<Meta> getMetasAlcancadas() {
-        return metas.stream()
-            .filter(Meta::isAlcancada)
-            .collect(Collectors.toList());
+        if (repositorioMetas instanceof RepositorioMetas) {
+            return ((RepositorioMetas) repositorioMetas).buscarConcluidas();
+        }
+        return new ArrayList<>();
     }
     
-    // === MÉTODOS DE CONTA ===
+    // MÉTODOS DE CONTA - Delegando para o repositório (SRP)
     public void adicionarConta(ContaFinanceira conta) {
-        if (conta != null && !contas.contains(conta)) {
-            contas.add(conta);
-        }
+        repositorioContas.adicionar(conta);
+        // Notificar observadores
+        notificarObservadores("Nova Conta Criada",
+            conta.getTipoConta() + " - " + conta.getNumeroConta());
     }
     
     public List<ContaFinanceira> getContas() {
-        return new ArrayList<>(contas);
+        return repositorioContas.listarTodos();
     }
     
     public List<ContaFinanceira> getContasDoUsuario(Usuario usuario) {
-        return contas.stream()
-            .filter(c -> c.getTitular().equals(usuario))
-            .collect(Collectors.toList());
+        if (repositorioContas instanceof RepositorioContas) {
+            return ((RepositorioContas) repositorioContas).buscarPorTitular(usuario);
+        }
+        return new ArrayList<>();
     }
     
     public ContaFinanceira buscarContaPorNumero(String numeroConta) {
-        return contas.stream()
-            .filter(c -> c.getNumeroConta().equals(numeroConta))
-            .findFirst()
-            .orElse(null);
+        return repositorioContas.buscarPorId(numeroConta);
     }
     
-    // === MÉTODOS DE ANÁLISE ===
+    // MÉTODOS DE ANÁLISE
+    public double calcularSaldoTotal() {
+        if (repositorioContas instanceof RepositorioContas) {
+            return ((RepositorioContas) repositorioContas).calcularSaldoTotal();
+        }
+        return 0.0;
+    }
+    
     public double calcularSaldoTotal(Usuario usuario) {
         return getContasDoUsuario(usuario).stream()
             .mapToDouble(ContaFinanceira::consultarSaldo)
@@ -149,53 +201,74 @@ public class GerenciadorFinanceiro {
             .sum();
     }
     
-    // === MÉTODOS DE ORÇAMENTO ===
+    // MÉTODOS DE ORÇAMENTO - Delegando para o repositório (SRP)
     public void adicionarOrcamento(Orcamento orcamento) {
-        if (orcamento != null) {
-            orcamentos.add(orcamento);
-        }
+        repositorioOrcamentos.adicionar(orcamento);
+        notificarObservadores("Novo Orçamento Criado", orcamento.getNome());
     }
     
     public List<Orcamento> getOrcamentos() {
-        return new ArrayList<>(orcamentos);
+        return repositorioOrcamentos.listarTodos();
     }
     
     public List<Orcamento> getOrcamentosDoUsuario(Usuario usuario) {
-        return orcamentos.stream()
-            .filter(o -> o.getResponsavel().equals(usuario))
-            .collect(Collectors.toList());
+        // Orçamento não tem usuário diretamente - filtrar por outro critério se necessário
+        return repositorioOrcamentos.listarTodos();
     }
     
     public List<Orcamento> getOrcamentosEstourados() {
-        return orcamentos.stream()
-            .filter(Orcamento::isEstourado)
-            .collect(Collectors.toList());
+        if (repositorioOrcamentos instanceof RepositorioOrcamentos) {
+            return ((RepositorioOrcamentos) repositorioOrcamentos).buscarEstourados();
+        }
+        return new ArrayList<>();
     }
     
     public List<Orcamento> getOrcamentosProximosDoLimite() {
-        return orcamentos.stream()
-            .filter(Orcamento::isProximoDoLimite)
-            .collect(Collectors.toList());
+        if (repositorioOrcamentos instanceof RepositorioOrcamentos) {
+            return ((RepositorioOrcamentos) repositorioOrcamentos).buscarProximosDoLimite(80.0);
+        }
+        return new ArrayList<>();
     }
     
     public Orcamento buscarOrcamentoPorCategoria(Usuario usuario, Categoria categoria) {
-        return orcamentos.stream()
-            .filter(o -> o.getResponsavel().equals(usuario) && 
-                        o.getCategoria() == categoria &&
-                        o.isMesAtual())
-            .findFirst()
-            .orElse(null);
+        if (repositorioOrcamentos instanceof RepositorioOrcamentos) {
+            return ((RepositorioOrcamentos) repositorioOrcamentos)
+                .buscarPorCategoria(categoria).stream()
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
     }
     
-    // === MÉTODO DE RESET (para testes) ===
+    // Verifica e notifica alertas automáticos
+    public void verificarAlertas() {
+        // Alertar sobre metas atrasadas
+        List<Meta> metasAtrasadas = getMetasAtrasadas();
+        for (Meta meta : metasAtrasadas) {
+            notificarObservadores("⚠️ Meta Atrasada",
+                meta.getDescricao() + " - Falta: R$ " + 
+                String.format("%.2f", meta.getValorAlvo() - meta.getValorAtual()));
+        }
+        
+        // Alertar sobre orçamentos estourados
+        List<Orcamento> orcamentosEstourados = getOrcamentosEstourados();
+        for (Orcamento orcamento : orcamentosEstourados) {
+            if (orcamento.deveEnviarAlerta()) {
+                notificarObservadores("⚠️ Orçamento Estourado",
+                    orcamento.getNome() + " - Excedido em R$ " + 
+                    String.format("%.2f", orcamento.getValorUltrapassado()));
+                orcamento.marcarAlertaEnviado();
+            }
+        }
+    }
+
     public void limparDados() {
-        usuarios.clear();
-        transacoes.clear();
-        metas.clear();
-        contas.clear();
-        orcamentos.clear();
+        repositorioUsuarios.limpar();
+        repositorioContas.limpar();
+        repositorioTransacoes.limpar();
+        repositorioMetas.limpar();
+        repositorioOrcamentos.limpar();
     }
-    
     // Método para resetar o singleton (útil em testes)
     public static void resetarInstancia() {
         instancia = null;

@@ -1,6 +1,9 @@
+import java.io.Serializable;
+
 // Classe que representa uma Conta Corrente tradicional
 // Possui saldo e limite de cheque especial
-public class ContaCorrente implements ContaFinanceira {
+public class ContaCorrente implements ContaFinanceira, Serializable {
+    private static final long serialVersionUID = 1L;
     
     private String numeroConta;
     private Usuario titular;
@@ -127,6 +130,14 @@ public class ContaCorrente implements ContaFinanceira {
         if (tarifaMensal >= 0) {
             this.tarifaMensal = tarifaMensal;
         }
+    }
+
+    public void desativar() {
+        this.ativa = false;
+    }
+
+    public void reativar() {
+        this.ativa = true;
     }
     
     // Verifica se a conta está usando o cheque especial

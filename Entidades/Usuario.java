@@ -1,14 +1,24 @@
-public abstract class Usuario {
+import java.io.Serializable;
+import java.util.UUID;
+
+public abstract class Usuario implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private String id;
     private String nome;
     private String email;
 
 // CONSTRUTOR
     protected Usuario(String nome, String email) {
+        this.id = UUID.randomUUID().toString();
         this.nome = nome;
         this.email = email;
     }
 
 // GETTERS
+    public String getId() {
+        return id;
+    }
+
     public String getNome() {
         return nome;
     }

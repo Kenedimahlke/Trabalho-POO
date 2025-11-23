@@ -1,9 +1,11 @@
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 // Classe que representa uma transação financeira
-public class Transacao {
+public class Transacao implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static int contadorId = 1;
     private int id;
     private TipoTransacao tipo;
@@ -210,6 +212,7 @@ public class Transacao {
     public Usuario getBeneficiario() { return beneficiario; }
     public ContaFinanceira getContaOrigem() { return contaOrigem; }
     public ContaFinanceira getContaDestino() { return contaDestino; }
+    public ContaFinanceira getConta() { return contaOrigem; } // Método de compatibilidade
     public boolean isRecorrente() { return recorrente; }
     public int getParcelas() { return parcelas; }
     public int getParcelaAtual() { return parcelaAtual; }

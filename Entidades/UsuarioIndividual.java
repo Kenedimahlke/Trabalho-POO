@@ -3,12 +3,20 @@ public class UsuarioIndividual extends Usuario {
     private String perfil;
     private boolean ativo;
 
-// CONSTRUTOR
+// CONSTRUTOR principal
     public UsuarioIndividual(String nome, String email, String cpf, String perfil, boolean ativo) {
         super(nome, email);
         this.cpf = cpf;
         this.perfil = (perfil != null && !perfil.isEmpty()) ? perfil : "BASICO";
         this.ativo = ativo;
+    }
+
+    // CONSTRUTOR simplificado (compatibilidade com Main)
+    public UsuarioIndividual(String nome, String cpf, String email) {
+        super(nome, email);
+        this.cpf = cpf;
+        this.perfil = "BASICO";
+        this.ativo = true;
     }
 
 // MÉTODOS IMPLEMENTADOS

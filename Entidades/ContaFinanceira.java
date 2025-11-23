@@ -1,5 +1,7 @@
+import java.io.Serializable;
+
 // Interface base para todas as contas financeiras do sistema
-public interface ContaFinanceira {
+public interface ContaFinanceira extends Serializable {
     
     // Deposita um valor na conta
     void depositar(double valor);

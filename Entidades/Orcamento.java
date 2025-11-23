@@ -1,8 +1,10 @@
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.io.Serializable;
 
 // Classe que representa um orçamento para controlar limites por categoria
-public class Orcamento {
+public class Orcamento implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String nome;
     private Categoria categoria;
     private double limiteValor;
@@ -96,41 +98,22 @@ public class Orcamento {
     public double getValorUltrapassado() {
         return Math.max(valorGasto - limiteValor, 0);
     }
-    
-    // Zera o orçamento para renovação
-    public void renovar() {
+
+    public void resetar() {
         this.valorGasto = 0.0;
         this.alertaEnviado = false;
-        this.mesReferencia = YearMonth.now();
     }
-    
-    // Cria um novo orçamento para o próximo mês baseado neste
-    public Orcamento criarProximoMes() {
-        return new Orcamento(nome, categoria, limiteValor, 
-                           mesReferencia.plusMonths(1), responsavel);
-    }
-    
-    @Override
-    public String toString() {
+
+    public String gerarRelatorio() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Orçamento: ").append(nome).append("\n");
+        sb.append("=== RELATÓRIO DE ORÇAMENTO ===\n");
+        sb.append("Nome: ").append(nome).append("\n");
         sb.append("Categoria: ").append(categoria.getNome()).append("\n");
-        sb.append("Mês: ").append(mesReferencia).append("\n");
-        sb.append("Gasto: R$ ").append(String.format("%.2f", valorGasto));
-        sb.append(" / R$ ").append(String.format("%.2f", limiteValor));
-        sb.append(" (").append(String.format("%.1f", getPercentualGasto())).append("%)\n");
+        sb.append("Limite: R$ ").append(String.format("%.2f", limiteValor)).append("\n");
+        sb.append("Gasto: R$ ").append(String.format("%.2f", valorGasto)).append("\n");
+        sb.append("Percentual: ").append(String.format("%.1f", getPercentualGasto())).append("%\n");
         sb.append("Disponível: R$ ").append(String.format("%.2f", getValorDisponivel())).append("\n");
-        
-        if (isEstourado()) {
-            sb.append("ORÇAMENTO ESTOURADO! Ultrapassou em R$ ");
-            sb.append(String.format("%.2f", getValorUltrapassado())).append("\n");
-        } else if (isProximoDoLimite()) {
-            sb.append("Atenção! Próximo do limite (");
-            sb.append(String.format("%.0f", percentualAlerta * 100)).append("%)\n");
-        } else {
-            sb.append("Orçamento sob controle\n");
-        }
-        
+        sb.append("Status: ").append(isEstourado() ? "ESTOURADO" : "OK").append("\n");
         return sb.toString();
     }
     

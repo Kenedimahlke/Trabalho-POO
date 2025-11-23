@@ -1,6 +1,9 @@
+import java.io.Serializable;
+
 // Classe que representa uma Carteira de Investimentos
 // Com diferentes perfis de risco e rentabilidade
-public class CarteiraInvestimento implements ContaFinanceira {
+public class CarteiraInvestimento implements ContaFinanceira, Serializable {
+    private static final long serialVersionUID = 1L;
     
     private String numeroConta;
     private Usuario titular;

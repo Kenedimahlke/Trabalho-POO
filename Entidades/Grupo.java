@@ -16,6 +16,15 @@ public class Grupo extends Usuario {
         this.quantidadeMembros = 1;
     }
 
+    // CONSTRUTOR simplificado (compatibilidade com Main)
+    public Grupo(String nome, String descricao) {
+        super(nome, nome + "@grupo.com"); // Email gerado
+        this.limiteMaximoMembros = 10;
+        this.membros = new UsuarioIndividual[limiteMaximoMembros];
+        this.administrador = null; // Será definido depois
+        this.quantidadeMembros = 0;
+    }
+
     @Override
     public boolean podeCriarLancamento() {
         // Grupo pode criar lançamento se tiver pelo menos um membro ativo

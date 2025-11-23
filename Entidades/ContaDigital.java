@@ -1,6 +1,9 @@
+import java.io.Serializable;
+
 // Classe que representa uma Conta Digital (como Nubank, Inter, etc)
 // Possui rendimento automático no saldo
-public class ContaDigital implements ContaFinanceira {
+public class ContaDigital implements ContaFinanceira, Serializable {
+    private static final long serialVersionUID = 1L;
     
     private String numeroConta;
     private Usuario titular;
