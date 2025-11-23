@@ -9,6 +9,7 @@ public class GerenciadorFinanceiro {
     private List<Transacao> transacoes;
     private List<Meta> metas;
     private List<ContaFinanceira> contas;
+    private List<Orcamento> orcamentos;
     
     // CONSTRUTOR privado (Singleton)
     private GerenciadorFinanceiro() {
@@ -16,6 +17,7 @@ public class GerenciadorFinanceiro {
         transacoes = new ArrayList<>();
         metas = new ArrayList<>();
         contas = new ArrayList<>();
+        orcamentos = new ArrayList<>();
     }
     
     // Método para obter a instância única
@@ -147,12 +149,51 @@ public class GerenciadorFinanceiro {
             .sum();
     }
     
+    // === MÉTODOS DE ORÇAMENTO ===
+    public void adicionarOrcamento(Orcamento orcamento) {
+        if (orcamento != null) {
+            orcamentos.add(orcamento);
+        }
+    }
+    
+    public List<Orcamento> getOrcamentos() {
+        return new ArrayList<>(orcamentos);
+    }
+    
+    public List<Orcamento> getOrcamentosDoUsuario(Usuario usuario) {
+        return orcamentos.stream()
+            .filter(o -> o.getResponsavel().equals(usuario))
+            .collect(Collectors.toList());
+    }
+    
+    public List<Orcamento> getOrcamentosEstourados() {
+        return orcamentos.stream()
+            .filter(Orcamento::isEstourado)
+            .collect(Collectors.toList());
+    }
+    
+    public List<Orcamento> getOrcamentosProximosDoLimite() {
+        return orcamentos.stream()
+            .filter(Orcamento::isProximoDoLimite)
+            .collect(Collectors.toList());
+    }
+    
+    public Orcamento buscarOrcamentoPorCategoria(Usuario usuario, Categoria categoria) {
+        return orcamentos.stream()
+            .filter(o -> o.getResponsavel().equals(usuario) && 
+                        o.getCategoria() == categoria &&
+                        o.isMesAtual())
+            .findFirst()
+            .orElse(null);
+    }
+    
     // === MÉTODO DE RESET (para testes) ===
     public void limparDados() {
         usuarios.clear();
         transacoes.clear();
         metas.clear();
         contas.clear();
+        orcamentos.clear();
     }
     
     // Método para resetar o singleton (útil em testes)

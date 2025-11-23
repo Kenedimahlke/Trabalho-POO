@@ -23,6 +23,11 @@ public class ContaFactory {
                 String tipoInv = params.length > 0 ? (String) params[0] : "Conservador";
                 yield new CarteiraInvestimento(numero, titular, tipoInv);
             }
+            case "cofrinho" -> {
+                String objetivo = params.length > 0 ? (String) params[0] : "Economia";
+                double meta = params.length > 1 ? (double) params[1] : 1000.0;
+                yield new Cofrinho(numero, titular, objetivo, meta);
+            }
             default -> throw new IllegalArgumentException("Tipo de conta inválido: " + tipo);
         };
     }
@@ -40,5 +45,34 @@ public class ContaFactory {
     // Método auxiliar para criar carteira de investimento
     public static CarteiraInvestimento criarCarteiraInvestimento(String numero, Usuario titular, String perfil) {
         return new CarteiraInvestimento(numero, titular, perfil);
+    }
+    
+    // Método auxiliar para criar cofrinho
+    public static Cofrinho criarCofrinho(String numero, Usuario titular, String objetivo, double meta) {
+        return new Cofrinho(numero, titular, objetivo, meta);
+    }
+    
+    // Método auxiliar para criar cofrinho com prazo
+    public static Cofrinho criarCofrinhoComPrazo(String numero, Usuario titular, String objetivo, 
+                                                  double meta, LocalDate prazo) {
+        return new Cofrinho(numero, titular, objetivo, meta, prazo);
+    }
+    
+    // Método auxiliar para criar conta corrente com limite customizado
+    public static ContaCorrente criarContaCorrente(String numero, Usuario titular, double limiteChequeEspecial) {
+        return new ContaCorrente(numero, titular, limiteChequeEspecial);
+    }
+    
+    // Método auxiliar para criar conta digital com rendimento customizado
+    public static ContaDigital criarContaDigital(String numero, Usuario titular, double rendimento) {
+        return new ContaDigital(numero, titular, rendimento);
+    }
+    
+    // Método auxiliar para criar cartão de crédito
+    public static CartaoCredito criarCartaoCredito(String numero, Usuario titular, double limite) {
+        LocalDate hoje = LocalDate.now();
+        LocalDate fechamento = hoje.withDayOfMonth(15);
+        LocalDate vencimento = hoje.withDayOfMonth(10).plusMonths(1);
+        return new CartaoCredito(numero, titular, limite, fechamento, vencimento);
     }
 }
