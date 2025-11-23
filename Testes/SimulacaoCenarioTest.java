@@ -1,8 +1,22 @@
-import org.junit.jupiter.api.*;
-import static org.junit.jupiter.api.Assertions.*;
+package Testes;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Factory.*;
+import Gerenciadores.*;
+import Interfaces.*;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimulacaoCenarioTest {
     

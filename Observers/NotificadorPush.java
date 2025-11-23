@@ -1,3 +1,13 @@
+package Observers;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import Interfaces.Observer;
+import java.time.*;
+import java.util.*;
+
 // Observador que simula push notifications
 public class NotificadorPush implements Observer {
     private String dispositivoId;

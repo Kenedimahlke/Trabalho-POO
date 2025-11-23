@@ -1,3 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 public class Grupo extends Usuario {
     private UsuarioIndividual[] membros;
     private UsuarioIndividual administrador;

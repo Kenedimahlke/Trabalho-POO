@@ -1,6 +1,13 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 // Classe que representa uma meta financeira
 public class Meta implements Serializable {
@@ -30,7 +37,7 @@ public class Meta implements Serializable {
     // Atualiza o progresso da meta
     public void atualizarProgresso(double valor) {
         if (valor < 0) {
-            return; // Ignora valor negativo ou lança exceção? Teste espera que saldo não mude.
+            return; 
         }
         this.valorAtual += valor;
         
@@ -84,9 +91,9 @@ public class Meta implements Serializable {
         sb.append("Prazo: ").append(prazo);
         
         if (isAlcancada()) {
-            sb.append(" - ✓ ALCANÇADA");
+            sb.append(" - ALCANÇADA");
         } else if (isAtrasada()) {
-            sb.append(" - ✗ ATRASADA");
+            sb.append(" - ATRASADA");
         } else {
             sb.append(" - ").append(getDiasRestantes()).append(" dias restantes");
         }

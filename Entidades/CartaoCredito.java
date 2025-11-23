@@ -1,5 +1,12 @@
-import java.time.LocalDate;
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
+import java.time.LocalDate;
+import java.util.*;
 
 // Classe que representa um Cartão de Crédito
 public class CartaoCredito implements ContaFinanceira, Serializable {

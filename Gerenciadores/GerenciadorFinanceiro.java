@@ -1,9 +1,23 @@
+package Gerenciadores;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import Interfaces.Observer;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
+import java.time.*;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 // Singleton - Gerenciador central do sistema financeiro
-// REFATORADO: Aplicando SRP - responsabilidade única de coordenar repositórios
 public class GerenciadorFinanceiro implements Subject {
     private static GerenciadorFinanceiro instancia;
     
@@ -35,7 +49,7 @@ public class GerenciadorFinanceiro implements Subject {
         return instancia;
     }
     
-    // MÉTODOS DE USUÁRIO - Delegando para o repositório (SRP)
+    // MÉTODOS DE USUÁRIO 
     public void adicionarUsuario(Usuario usuario) {
         repositorioUsuarios.adicionar(usuario);
         notificarObservadores("USUARIO_CADASTRADO", usuario);
@@ -81,12 +95,44 @@ public class GerenciadorFinanceiro implements Subject {
         return new ArrayList<>(observadores);
     }
     
-    // MÉTODOS DE TRANSAÇÃO - Delegando para o repositório (SRP)
+    // MÉTODOS DE TRANSAÇÃO 
     public void adicionarTransacao(Transacao transacao) {
         repositorioTransacoes.adicionar(transacao);
+        
+        // Atualiza orçamentos se for despesa
+        if (transacao.getTipo() == TipoTransacao.DESPESA) {
+            atualizarOrcamentos(transacao);
+        }
+        
         // Notificar observadores
         notificarObservadores("Nova Transação: " + transacao.getTipo(),
             String.format("R$ %.2f - %s", transacao.getValor(), transacao.getDescricao()));
+    }
+    
+    private void atualizarOrcamentos(Transacao transacao) {
+        if (repositorioOrcamentos == null) return;
+        
+        List<Orcamento> orcamentos = repositorioOrcamentos.listarTodos();
+        YearMonth transacaoMes = YearMonth.from(transacao.getData());
+        
+        for (Orcamento o : orcamentos) {
+            if (o.getCategoria().equals(transacao.getCategoria()) && 
+                o.getMesReferencia().equals(transacaoMes)) {
+                
+                o.adicionarGasto(transacao.getValor());
+                
+                if (o.deveEnviarAlerta()) {
+                     notificarObservadores("ALERTA_ORCAMENTO", 
+                        "Atenção! Orçamento de " + o.getCategoria().getNome() + " atingiu " + String.format("%.1f", o.getPercentualGasto()) + "%");
+                     o.marcarAlertaEnviado();
+                }
+                
+                if (o.isEstourado()) {
+                     notificarObservadores("ALERTA_ORCAMENTO", 
+                        "URGENTE! Orçamento de " + o.getCategoria().getNome() + " ESTOURADO!");
+                }
+            }
+        }
     }
     
     public List<Transacao> getTransacoes() {
@@ -117,7 +163,7 @@ public class GerenciadorFinanceiro implements Subject {
         return new ArrayList<>();
     }
     
-    // MÉTODOS DE META - Delegando para o repositório (SRP)
+    // MÉTODOS DE META 
     public void adicionarMeta(Meta meta) {
         repositorioMetas.adicionar(meta);
         // Notificar observadores
@@ -150,7 +196,7 @@ public class GerenciadorFinanceiro implements Subject {
         return new ArrayList<>();
     }
     
-    // MÉTODOS DE CONTA - Delegando para o repositório (SRP)
+    // MÉTODOS DE CONTA 
     public void adicionarConta(ContaFinanceira conta) {
         repositorioContas.adicionar(conta);
         // Notificar observadores
@@ -201,7 +247,7 @@ public class GerenciadorFinanceiro implements Subject {
             .sum();
     }
     
-    // MÉTODOS DE ORÇAMENTO - Delegando para o repositório (SRP)
+    // MÉTODOS DE ORÇAMENTO 
     public void adicionarOrcamento(Orcamento orcamento) {
         repositorioOrcamentos.adicionar(orcamento);
         notificarObservadores("Novo Orçamento Criado", orcamento.getNome());
@@ -269,8 +315,49 @@ public class GerenciadorFinanceiro implements Subject {
         repositorioMetas.limpar();
         repositorioOrcamentos.limpar();
     }
-    // Método para resetar o singleton (útil em testes)
+    // Método para resetar o singleton 
     public static void resetarInstancia() {
         instancia = null;
+    }
+    
+    // Processa transações recorrentes
+    public void processarRecorrencias() {
+        List<Transacao> transacoes = repositorioTransacoes.listarTodos();
+        List<Transacao> novasTransacoes = new ArrayList<>();
+        LocalDate hoje = LocalDate.now();
+        
+        for (Transacao t : transacoes) {
+            if (t.isRecorrente()) {
+                LocalDate proximaData = t.getData().plusMonths(1);
+                
+                // Se a próxima data já passou ou é hoje
+                if (!proximaData.isAfter(hoje)) {
+                    // Verifica se já existe a recorrência
+                    boolean existe = transacoes.stream().anyMatch(existente -> 
+                        existente.getDescricao().equals(t.getDescricao()) &&
+                        existente.getValor() == t.getValor() &&
+                        existente.getData().equals(proximaData) &&
+                        existente.getTipo() == t.getTipo()
+                    );
+                    
+                    if (!existe) {
+                        Transacao nova = t.gerarProximaRecorrencia();
+                        if (nova != null) {
+                            novasTransacoes.add(nova);
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (Transacao nova : novasTransacoes) {
+            adicionarTransacao(nova);
+            System.out.println("Recorrência gerada: " + nova.getDescricao() + " para " + nova.getData());
+        }
+        
+        // Se gerou novas, chama recursivamente para garantir meses subsequentes
+        if (!novasTransacoes.isEmpty()) {
+            processarRecorrencias();
+        }
     }
 }

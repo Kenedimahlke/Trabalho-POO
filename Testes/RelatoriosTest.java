@@ -1,14 +1,27 @@
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+package Testes;
 
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Factory.*;
+import Gerenciadores.*;
+import Interfaces.*;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RelatoriosTest {

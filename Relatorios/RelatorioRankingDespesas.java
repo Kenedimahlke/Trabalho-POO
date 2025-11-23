@@ -1,5 +1,12 @@
+package Relatorios;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.time.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,13 +62,8 @@ public class RelatorioRankingDespesas extends Relatorio {
             String descricao = t.getDescricao().length() > 25 ? 
                              t.getDescricao().substring(0, 22) + "..." : t.getDescricao();
             
-            String emoji = "";
-            if (ranking == 1) emoji = "🥇";
-            else if (ranking == 2) emoji = "🥈";
-            else if (ranking == 3) emoji = "🥉";
-            
             sb.append(String.format("%-5s %-12s %-20s %-25s %15s\n",
-                emoji + ranking + "º",
+                ranking + "º",
                 t.getData(),
                 categoria,
                 descricao,

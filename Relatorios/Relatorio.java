@@ -1,4 +1,12 @@
+package Relatorios;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.List;
 
 // Classe abstrata base para todos os relatórios do sistema

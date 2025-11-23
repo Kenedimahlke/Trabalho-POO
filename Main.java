@@ -1,3 +1,13 @@
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Factory.*;
+import Gerenciadores.*;
+import Interfaces.*;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -173,6 +183,7 @@ public class Main {
         System.out.println(" 3. Listar Transações");
         System.out.println(" 4. Estornar Transação");
         System.out.println(" 5. Adicionar Anexo à Transação");
+        System.out.println(" 6. Dividir Despesa (Rateio)");
         System.out.println(" 0. Voltar");
         System.out.println("═".repeat(65));
         System.out.print("Escolha uma opção: ");
@@ -194,6 +205,9 @@ public class Main {
                 break;
             case 5:
                 adicionarAnexoTransacao();
+                break;
+            case 6:
+                dividirDespesaRateio();
                 break;
             case 0:
                 return;
@@ -352,6 +366,7 @@ public class Main {
         System.out.println(" 4. Evolução de Saldo");
         System.out.println(" 5. Relatório Completo");
         System.out.println(" 6. Exportar Relatório");
+        System.out.println(" 7. Resumo de Grupo");
         System.out.println(" 0. Voltar");
         System.out.println("═".repeat(65));
         System.out.print("Escolha uma opção: ");
@@ -376,6 +391,9 @@ public class Main {
                 break;
             case 6:
                 exportarRelatorio();
+                break;
+            case 7:
+                gerarRelatorioResumoGrupo();
                 break;
             case 0:
                 return;
@@ -480,9 +498,14 @@ public class Main {
         System.out.print("Data (dd/MM/yyyy) [Enter para hoje]: ");
         LocalDate data = lerData();
         
+        System.out.print("É uma receita recorrente (mensal)? (S/N): ");
+        String respRecorrente = scanner.nextLine();
+        boolean recorrente = respRecorrente.equalsIgnoreCase("S");
+
         Transacao transacao = new Transacao(TipoTransacao.RECEITA, null, valor, descricao, 
                                            conta.getTitular(), conta);
         transacao.setData(data);
+        transacao.setRecorrente(recorrente);
         gerenciador.adicionarTransacao(transacao);
         
         System.out.println("\nReceita registrada com sucesso!");
@@ -503,13 +526,39 @@ public class Main {
         
         System.out.print("Data (dd/MM/yyyy) [Enter para hoje]: ");
         LocalDate data = lerData();
-        
-        Transacao transacao = new Transacao(TipoTransacao.DESPESA, categoria, valor, descricao, 
-                                           conta.getTitular(), conta);
-        transacao.setData(data);
-        gerenciador.adicionarTransacao(transacao);
-        
-        System.out.println("\nDespesa registrada com sucesso!");
+
+        System.out.print("É uma compra parcelada? (S/N): ");
+        String respParcela = scanner.nextLine();
+        boolean parcelado = respParcela.equalsIgnoreCase("S");
+
+        if (parcelado) {
+            System.out.print("Número de parcelas: ");
+            int numParcelas = lerOpcao();
+            
+            double valorParcela = valor / numParcelas;
+            
+            for (int i = 1; i <= numParcelas; i++) {
+                Transacao transacao = new Transacao(TipoTransacao.DESPESA, categoria, valorParcela, descricao, 
+                                                   conta.getTitular(), conta);
+                transacao.setData(data.plusMonths(i - 1));
+                transacao.setParcelas(numParcelas);
+                transacao.setParcelaAtual(i);
+                gerenciador.adicionarTransacao(transacao);
+            }
+            System.out.println("\nDespesa parcelada em " + numParcelas + "x registrada com sucesso!");
+        } else {
+            System.out.print("É uma despesa recorrente (mensal)? (S/N): ");
+            String respRecorrente = scanner.nextLine();
+            boolean recorrente = respRecorrente.equalsIgnoreCase("S");
+
+            Transacao transacao = new Transacao(TipoTransacao.DESPESA, categoria, valor, descricao, 
+                                               conta.getTitular(), conta);
+            transacao.setData(data);
+            transacao.setRecorrente(recorrente);
+            gerenciador.adicionarTransacao(transacao);
+            
+            System.out.println("\nDespesa registrada com sucesso!");
+        }
     }
     
     private static void listarTransacoes() {
@@ -1057,36 +1106,36 @@ public class Main {
     
     private static void carregarDados() {
         if (persistencia.existeDadosSalvos()) {
-            System.out.print("\nDados salvos encontrados. Deseja carregar? (S/N): ");
-            String resposta = scanner.nextLine();
-            
-            if (resposta.equalsIgnoreCase("S")) {
-                try {
-                    var dados = persistencia.carregarDados();
-                    
-                    // Carrega dados no gerenciador
-                    @SuppressWarnings("unchecked")
-                    List<Usuario> usuarios = (List<Usuario>) dados.get("usuarios");
-                    for (Usuario u : usuarios) {
-                        gerenciador.adicionarUsuario(u);
-                    }
-                    for (ContaFinanceira c : (List<ContaFinanceira>) dados.get("contas")) {
-                        gerenciador.adicionarConta(c);
-                    }
-                    for (Transacao t : (List<Transacao>) dados.get("transacoes")) {
-                        gerenciador.adicionarTransacao(t);
-                    }
-                    for (Meta m : (List<Meta>) dados.get("metas")) {
-                        gerenciador.adicionarMeta(m);
-                    }
-                    for (Orcamento o : (List<Orcamento>) dados.get("orcamentos")) {
-                        gerenciador.adicionarOrcamento(o);
-                    }
-                    
-                    System.out.println("Dados carregados com sucesso!");
-                } catch (Exception e) {
-                    System.out.println("Erro ao carregar dados: " + e.getMessage());
+            System.out.println("\nCarregando dados salvos...");
+            try {
+                var dados = persistencia.carregarDados();
+                
+                // Carrega dados no gerenciador
+                @SuppressWarnings("unchecked")
+                List<Usuario> usuarios = (List<Usuario>) dados.get("usuarios");
+                for (Usuario u : usuarios) {
+                    gerenciador.adicionarUsuario(u);
                 }
+                for (ContaFinanceira c : (List<ContaFinanceira>) dados.get("contas")) {
+                    gerenciador.adicionarConta(c);
+                }
+                for (Transacao t : (List<Transacao>) dados.get("transacoes")) {
+                    gerenciador.adicionarTransacao(t);
+                }
+                for (Meta m : (List<Meta>) dados.get("metas")) {
+                    gerenciador.adicionarMeta(m);
+                }
+                for (Orcamento o : (List<Orcamento>) dados.get("orcamentos")) {
+                    gerenciador.adicionarOrcamento(o);
+                }
+                
+                System.out.println("Dados carregados com sucesso!");
+                
+                // Processar recorrências após carregar
+                gerenciador.processarRecorrencias();
+                
+            } catch (Exception e) {
+                System.out.println("Erro ao carregar dados: " + e.getMessage());
             }
         }
     }
@@ -1245,5 +1294,98 @@ public class Main {
     private static void pausar() {
         System.out.print("\nPressione ENTER para continuar...");
         scanner.nextLine();
+    }
+
+    private static void dividirDespesaRateio() {
+        System.out.println("\n" + "═".repeat(65));
+        System.out.println("                  DIVIDIR DESPESA (RATEIO)");
+        System.out.println("═".repeat(65));
+        
+        List<Usuario> usuarios = gerenciador.getUsuarios();
+        List<Grupo> grupos = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            if (u instanceof Grupo) {
+                grupos.add((Grupo) u);
+            }
+        }
+        
+        if (grupos.isEmpty()) {
+            System.out.println("\nNenhum grupo cadastrado.");
+            return;
+        }
+        
+        for (int i = 0; i < grupos.size(); i++) {
+            System.out.printf("%d. %s\n", i + 1, grupos.get(i).getNome());
+        }
+        
+        System.out.print("Escolha o grupo: ");
+        int indice = lerOpcao() - 1;
+        
+        if (indice < 0 || indice >= grupos.size()) {
+            System.out.println("\nGrupo inválido!");
+            return;
+        }
+        
+        Grupo grupo = grupos.get(indice);
+        
+        System.out.print("Valor total da despesa: R$ ");
+        double valor = lerDouble();
+        
+        UsuarioIndividual[] membros = grupo.getMembros();
+        if (membros.length == 0) {
+             System.out.println("Grupo sem membros.");
+             return;
+        }
+        
+        double valorPorPessoa = valor / membros.length;
+        
+        System.out.println("\n--- Resultado do Rateio (Igualitário) ---");
+        for (UsuarioIndividual membro : membros) {
+            System.out.printf("%s: R$ %.2f\n", membro.getNome(), valorPorPessoa);
+        }
+        
+        System.out.println("\n(Nota: Esta é uma simulação. Nenhuma transação foi criada.)");
+    }
+
+    private static void gerarRelatorioResumoGrupo() {
+        inicializarGeradorRelatorios();
+        
+        List<Usuario> usuarios = gerenciador.getUsuarios();
+        List<Grupo> grupos = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            if (u instanceof Grupo) {
+                grupos.add((Grupo) u);
+            }
+        }
+        
+        if (grupos.isEmpty()) {
+            System.out.println("\nNenhum grupo cadastrado.");
+            return;
+        }
+        
+        for (int i = 0; i < grupos.size(); i++) {
+            System.out.printf("%d. %s\n", i + 1, grupos.get(i).getNome());
+        }
+        
+        System.out.print("Escolha o grupo: ");
+        int indice = lerOpcao() - 1;
+        
+        if (indice < 0 || indice >= grupos.size()) {
+            System.out.println("\nGrupo inválido!");
+            return;
+        }
+        
+        Grupo grupo = grupos.get(indice);
+        
+        System.out.print("\nData Início (dd/MM/yyyy): ");
+        LocalDate inicio = lerData();
+        
+        System.out.print("Data Fim (dd/MM/yyyy): ");
+        LocalDate fim = lerData();
+        
+        String relatorio = geradorRelatorios.gerarRelatorioResumoGrupo(grupo, inicio, fim);
+        System.out.println("\n" + relatorio);
+        
+        pausar();
     }
 }

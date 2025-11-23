@@ -1,3 +1,11 @@
+package Exceptions;
+
+import Entidades.*;
+import Enums.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 // Exceção lançada quando o limite de crédito ou operação é excedido
 public class LimiteExcedidoException extends Exception {
     

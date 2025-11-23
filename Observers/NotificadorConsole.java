@@ -1,5 +1,14 @@
+package Observers;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import Interfaces.Observer;
+import java.time.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 // Observador que envia notificações para o console
 public class NotificadorConsole implements Observer {

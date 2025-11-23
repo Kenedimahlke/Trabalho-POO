@@ -1,3 +1,11 @@
+package Strategy;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
 import java.util.List;
 
 // Estratégia para projetar o saldo futuro baseado no histórico

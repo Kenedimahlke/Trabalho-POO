@@ -1,3 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 public class UsuarioIndividual extends Usuario {
     private String cpf;
     private String perfil;

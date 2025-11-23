@@ -1,6 +1,21 @@
+package Testes;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Factory.*;
+import Gerenciadores.*;
+import Interfaces.*;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
+import java.time.*;
+import java.util.*;
+import java.util.List;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RepositorioMemoriaTest {

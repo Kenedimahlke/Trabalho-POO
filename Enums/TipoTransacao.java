@@ -1,3 +1,11 @@
+package Enums;
+
+import Entidades.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 // Tipos de transações financeiras do sistema
 public enum TipoTransacao {
     RECEITA("Receita"),

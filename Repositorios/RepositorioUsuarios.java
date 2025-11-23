@@ -1,6 +1,13 @@
+package Repositorios;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
 import java.util.List;
 
-// Repositório específico para Usuários (SRP)
 public class RepositorioUsuarios extends RepositorioMemoria<Usuario> {
     
     @Override

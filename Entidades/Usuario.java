@@ -1,4 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
+import java.util.*;
 import java.util.UUID;
 
 public abstract class Usuario implements Serializable {

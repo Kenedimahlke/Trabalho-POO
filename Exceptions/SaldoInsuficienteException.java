@@ -1,3 +1,11 @@
+package Exceptions;
+
+import Entidades.*;
+import Enums.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 // Exceção lançada quando não há saldo suficiente para realizar uma operação
 public class SaldoInsuficienteException extends Exception {
     

@@ -1,4 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
+import java.util.*;
 
 // Classe que representa uma Conta Corrente tradicional
 // Possui saldo e limite de cheque especial

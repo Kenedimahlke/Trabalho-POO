@@ -1,7 +1,15 @@
+package Strategy;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.*;
+import java.time.*;
+import java.util.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 // Implementação concreta de persistência usando serialização Java (Strategy Pattern)
 public class PersistenciaSerializacao implements EstrategiaPersistencia {

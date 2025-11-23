@@ -1,4 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
+import java.util.*;
 
 // Interface base para todas as contas financeiras do sistema
 public interface ContaFinanceira extends Serializable {

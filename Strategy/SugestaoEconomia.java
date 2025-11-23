@@ -1,3 +1,11 @@
+package Strategy;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

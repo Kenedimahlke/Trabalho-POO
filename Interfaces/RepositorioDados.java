@@ -1,3 +1,10 @@
+package Interfaces;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import java.time.*;
+import java.util.*;
 import java.util.List;
 
 // Interface para repositórios de dados (DIP)

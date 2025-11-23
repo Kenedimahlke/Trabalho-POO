@@ -1,9 +1,22 @@
+package Gerenciadores;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import Interfaces.Observer;
+import Observers.*;
+import Relatorios.*;
+import Repositorios.*;
+import Strategy.*;
 import java.io.*;
+import java.time.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 // Classe responsável pela persistência de dados do sistema
 // REFATORADO: Aplicando DIP - Depende de EstrategiaPersistencia (interface)

@@ -1,6 +1,14 @@
+package Relatorios;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.List;
 
 // Classe responsável por gerenciar a criação e exportação de diferentes tipos de relatórios
@@ -37,6 +45,12 @@ public class GerenciadorRelatorios {
                                              double saldoInicial) {
         RelatorioEvolucaoSaldo relatorio = 
             new RelatorioEvolucaoSaldo(transacoes, dataInicio, dataFim, saldoInicial);
+        return relatorio.gerar();
+    }
+    
+    // Gera relatório de resumo de grupo
+    public String gerarRelatorioResumoGrupo(Grupo grupo, LocalDate dataInicio, LocalDate dataFim) {
+        RelatorioResumoGrupo relatorio = new RelatorioResumoGrupo(transacoes, grupo, dataInicio, dataFim);
         return relatorio.gerar();
     }
     

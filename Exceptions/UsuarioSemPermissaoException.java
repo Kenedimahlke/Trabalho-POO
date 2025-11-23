@@ -1,3 +1,11 @@
+package Exceptions;
+
+import Entidades.*;
+import Enums.*;
+import Interfaces.*;
+import java.time.*;
+import java.util.*;
+
 // Exceção lançada quando um usuário tenta realizar uma ação sem permissão
 public class UsuarioSemPermissaoException extends Exception {
     public UsuarioSemPermissaoException(String mensagem) {

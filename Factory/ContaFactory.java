@@ -1,4 +1,12 @@
+package Factory;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 
 // Factory para criação de diferentes tipos de contas financeiras
 public class ContaFactory {

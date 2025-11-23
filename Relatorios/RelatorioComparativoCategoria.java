@@ -1,5 +1,12 @@
+package Relatorios;
+
+import Entidades.*;
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.time.*;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;

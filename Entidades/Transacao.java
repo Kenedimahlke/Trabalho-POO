@@ -1,5 +1,12 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 

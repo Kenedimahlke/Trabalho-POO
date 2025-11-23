@@ -1,4 +1,11 @@
+package Entidades;
+
+import Enums.*;
+import Exceptions.*;
+import Interfaces.*;
 import java.io.Serializable;
+import java.time.*;
+import java.util.*;
 
 // Classe que representa uma Carteira de Investimentos
 // Com diferentes perfis de risco e rentabilidade
