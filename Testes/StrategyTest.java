@@ -105,14 +105,6 @@ public class StrategyTest {
     public void testSugestaoEconomia() {
         SugestaoEconomia sugestao = new SugestaoEconomia();
         
-        // Gastos por categoria:
-        // Moradia: 1500
-        // Alimentacao: 800+200 = 1000
-        // Lazer: 100
-        
-        // Maior gasto: 1500 (Moradia)
-        // Sugestao: 15% de 1500 = 225
-        
         assertEquals(225.0, sugestao.calcular(transacoes), 0.01);
         
         Map<Categoria, Double> analise = sugestao.analisarGastosPorCategoria(transacoes);

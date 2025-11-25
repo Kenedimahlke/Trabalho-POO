@@ -44,8 +44,7 @@ public class GrupoTest {
     public void testAdicionarMembro() {
         boolean adicionou = grupo.adicionarMembro(membro1);
         assertTrue(adicionou);
-        // O método contemMembro é privado. Vou testar indiretamente tentando adicionar de novo.
-        assertFalse(grupo.adicionarMembro(membro1)); // Não deve adicionar duplicado
+        assertFalse(grupo.adicionarMembro(membro1)); 
     }
 
     @Test
@@ -54,7 +53,6 @@ public class GrupoTest {
         boolean removeu = grupo.removerMembro(membro1);
         assertTrue(removeu);
         
-        // Tentar remover de novo
         assertFalse(grupo.removerMembro(membro1));
     }
 
@@ -66,13 +64,11 @@ public class GrupoTest {
 
     @Test
     public void testLimiteMembros() {
-        // O limite padrão é 10. Já tem 1 (admin).
-        // Adicionar mais 9
+
         for (int i = 0; i < 9; i++) {
             grupo.adicionarMembro(new UsuarioIndividual("User" + i, "user" + i + "@email.com", "123"));
         }
         
-        // Tentar adicionar o 11º membro (total)
         boolean adicionou = grupo.adicionarMembro(membro1);
         assertFalse(adicionou);
     }
@@ -82,8 +78,7 @@ public class GrupoTest {
         Grupo grupoSimples = new Grupo("Amigos", "Grupo de amigos");
         assertEquals("Amigos", grupoSimples.getNome());
         assertEquals("Amigos@grupo.com", grupoSimples.getEmail());
-        // Admin é null inicialmente
-        assertFalse(grupoSimples.podeCriarLancamento()); // Sem membros ativos
+        assertFalse(grupoSimples.podeCriarLancamento());
         
         grupoSimples.adicionarMembro(membro1);
         assertTrue(grupoSimples.podeCriarLancamento());

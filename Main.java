@@ -104,6 +104,7 @@ public class Main {
         System.out.println(" 1. Cadastrar Usuario Individual");
         System.out.println(" 2. Cadastrar Grupo");
         System.out.println(" 3. Listar Usuarios");
+        System.out.println(" 4. Adicionar Membro ao Grupo");
         System.out.println(" 0. Voltar");
         System.out.println("═".repeat(65));
         System.out.print("Escolha uma opcao: ");
@@ -119,6 +120,9 @@ public class Main {
                 break;
             case 3:
                 listarUsuarios();
+                break;
+            case 4:
+                adicionarMembroGrupo();
                 break;
             case 0:
                 return;
@@ -1477,5 +1481,71 @@ public class Main {
         System.out.println("\n" + relatorio);
         
         pausar();
+    }
+    
+    private static void adicionarMembroGrupo() {
+        // 1. Selecionar Grupo
+        List<Usuario> usuarios = gerenciador.getUsuarios();
+        List<Grupo> grupos = new ArrayList<>();
+        
+        for (Usuario u : usuarios) {
+            if (u instanceof Grupo) {
+                grupos.add((Grupo) u);
+            }
+        }
+        
+        if (grupos.isEmpty()) {
+            System.out.println("\nNenhum grupo cadastrado.");
+            return;
+        }
+        
+        System.out.println("\n--- SELECIONE O GRUPO ---");
+        for (int i = 0; i < grupos.size(); i++) {
+            System.out.println((i + 1) + ". " + grupos.get(i).getNome());
+        }
+        System.out.print("Escolha: ");
+        int indiceGrupo = lerOpcao() - 1;
+        
+        if (indiceGrupo < 0 || indiceGrupo >= grupos.size()) {
+            System.out.println("Grupo inválido!");
+            return;
+        }
+        
+        Grupo grupo = grupos.get(indiceGrupo);
+        
+        // 2. Selecionar Usuário para adicionar
+        List<UsuarioIndividual> individuais = new ArrayList<>();
+        for (Usuario u : usuarios) {
+            if (u instanceof UsuarioIndividual) {
+                individuais.add((UsuarioIndividual) u);
+            }
+        }
+        
+        if (individuais.isEmpty()) {
+            System.out.println("\nNenhum usuário individual cadastrado para adicionar.");
+            return;
+        }
+        
+        System.out.println("\n--- SELECIONE O USUÁRIO PARA ADICIONAR ---");
+        for (int i = 0; i < individuais.size(); i++) {
+            System.out.println((i + 1) + ". " + individuais.get(i).getNome());
+        }
+        System.out.print("Escolha: ");
+        int indiceUsuario = lerOpcao() - 1;
+        
+        if (indiceUsuario < 0 || indiceUsuario >= individuais.size()) {
+            System.out.println("Usuário inválido!");
+            return;
+        }
+        
+        UsuarioIndividual novoMembro = individuais.get(indiceUsuario);
+        
+        // 3. Adicionar
+        boolean sucesso = grupo.adicionarMembro(novoMembro);
+        if (sucesso) {
+            System.out.println("\nMembro " + novoMembro.getNome() + " adicionado ao grupo " + grupo.getNome() + " com sucesso!");
+        } else {
+            System.out.println("\nErro ao adicionar membro. O grupo pode estar cheio ou o usuário já é membro.");
+        }
     }
 }

@@ -26,21 +26,17 @@ public class RelatoriosTest {
         dataInicio = LocalDate.of(2023, 1, 1);
         dataFim = LocalDate.of(2023, 1, 31);
 
-        // Adicionando algumas transações para teste
         transacoes.add(criarTransacao("Salário", 5000.0, TipoTransacao.RECEITA, LocalDate.of(2023, 1, 5), Categoria.SALARIO));
         transacoes.add(criarTransacao("Aluguel", 1500.0, TipoTransacao.DESPESA, LocalDate.of(2023, 1, 10), Categoria.MORADIA));
         transacoes.add(criarTransacao("Supermercado", 800.0, TipoTransacao.DESPESA, LocalDate.of(2023, 1, 15), Categoria.ALIMENTACAO));
         transacoes.add(criarTransacao("Cinema", 100.0, TipoTransacao.DESPESA, LocalDate.of(2023, 1, 20), Categoria.LAZER));
         transacoes.add(criarTransacao("Freelance", 1000.0, TipoTransacao.RECEITA, LocalDate.of(2023, 1, 25), Categoria.SALARIO));
-        
-        // Transação fora do período
         transacoes.add(criarTransacao("Fevereiro", 200.0, TipoTransacao.DESPESA, LocalDate.of(2023, 2, 1), Categoria.LAZER));
 
         gerenciadorRelatorios = new GerenciadorRelatorios(transacoes);
     }
 
     private Transacao criarTransacao(String descricao, double valor, TipoTransacao tipo, LocalDate data, Categoria categoria) {
-        // Usando null para pagador e contaOrigem pois não são usados nos relatórios testados
         Transacao t = new Transacao(tipo, categoria, valor, descricao, null, null);
         t.setData(data);
         return t;
@@ -56,9 +52,8 @@ public class RelatoriosTest {
         assertTrue(relatorio.contains("Supermercado"));
         assertTrue(relatorio.contains("Cinema"));
         assertTrue(relatorio.contains("Freelance"));
-        assertFalse(relatorio.contains("Fevereiro")); // Fora do período
+        assertFalse(relatorio.contains("Fevereiro")); 
         
-        // Verificar totais
         assertTrue(relatorio.contains("Total de Receitas:"));
         assertTrue(relatorio.contains("Total de Despesas:"));
     }
@@ -72,7 +67,6 @@ public class RelatoriosTest {
         assertTrue(relatorio.contains("Alimentação"));
         assertTrue(relatorio.contains("Lazer"));
         
-        // Verificar se SALARIO não aparece (pois é receita)
         assertFalse(relatorio.contains("Salário"));
     }
 
@@ -153,7 +147,6 @@ public class RelatoriosTest {
     
     @Test
     public void testRelatorioVazio() {
-        // Testar com lista vazia de transações
         GerenciadorRelatorios gerenciadorVazio = new GerenciadorRelatorios(new ArrayList<>());
         String relatorio = gerenciadorVazio.gerarRelatorioPorPeriodo(dataInicio, dataFim);
         assertTrue(relatorio.contains("Total de Receitas: R$ 0,00"));

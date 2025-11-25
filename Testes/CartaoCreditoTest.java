@@ -84,16 +84,7 @@ public class CartaoCreditoTest {
     @Test
     public void testPagamentoMaiorQueFatura() throws Exception {
         cartao.sacar(500.0);
-        cartao.depositar(600.0); // Paga 600 (100 a mais)
-        
-        // O comportamento atual do código é: limiteDisponivel += faturaAtual; faturaAtual = 0.0;
-        // Mas o código diz: limiteDisponivel += faturaAtual;
-        // Espera, vamos ver o código:
-        // if (valor <= faturaAtual) { ... } else { limiteDisponivel += faturaAtual; faturaAtual = 0.0; }
-        // Se eu pago 600 e a fatura é 500:
-        // limiteDisponivel (500) += 500 = 1000.
-        // O valor excedente (100) é ignorado? O código parece ter um bug ou comportamento simplificado.
-        // Vamos testar o comportamento atual.
+        cartao.depositar(600.0); 
         
         assertEquals(1000.0, cartao.consultarSaldo());
         assertEquals(0.0, cartao.getFaturaAtual());
@@ -108,7 +99,7 @@ public class CartaoCreditoTest {
     
     @Test
     public void testFecharFatura() {
-        // Apenas imprime no console, mas podemos chamar para garantir que não quebra
+       
         cartao.fecharFatura();
     }
 }
