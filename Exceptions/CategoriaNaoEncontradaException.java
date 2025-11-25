@@ -6,7 +6,6 @@ import Interfaces.*;
 import java.time.*;
 import java.util.*;
 
-// Exceção lançada quando uma categoria não é encontrada
 public class CategoriaNaoEncontradaException extends Exception {
     public CategoriaNaoEncontradaException(String mensagem) {
         super(mensagem);

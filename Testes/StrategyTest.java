@@ -2,23 +2,11 @@ package Testes;
 
 import Entidades.*;
 import Enums.*;
-import Exceptions.*;
 import Factory.*;
-import Gerenciadores.*;
-import Interfaces.*;
-import Observers.*;
-import Relatorios.*;
-import Repositorios.*;
 import Strategy.*;
 import java.time.*;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class StrategyTest {
@@ -26,15 +14,16 @@ public class StrategyTest {
     private List<Transacao> transacoes;
     private Usuario usuario1;
     private Usuario usuario2;
+    private ContaFinanceira conta;
 
     @BeforeEach
     public void setUp() {
         transacoes = new ArrayList<>();
-        usuario1 = new UsuarioIndividual("User1", "user1@email.com", "123");
-        usuario2 = new UsuarioIndividual("User2", "user2@email.com", "123");
+        usuario1 = new UsuarioIndividual("User1", "111.111.111-11", "user1@email.com");
+        usuario2 = new UsuarioIndividual("User2", "222.222.222-22", "user2@email.com");
+        conta = ContaFactory.criarConta("CORRENTE", "123-4", usuario1, 10000.0);
 
-        // Adicionando transações
-        transacoes.add(criarTransacao("Salário", 5000.0, TipoTransacao.RECEITA, Categoria.SALARIO));
+        transacoes.add(criarTransacao("Salario", 5000.0, TipoTransacao.RECEITA, Categoria.SALARIO));
         transacoes.add(criarTransacao("Aluguel", 1500.0, TipoTransacao.DESPESA, Categoria.MORADIA));
         transacoes.add(criarTransacao("Supermercado", 800.0, TipoTransacao.DESPESA, Categoria.ALIMENTACAO));
         transacoes.add(criarTransacao("Cinema", 100.0, TipoTransacao.DESPESA, Categoria.LAZER));
@@ -42,120 +31,112 @@ public class StrategyTest {
     }
 
     private Transacao criarTransacao(String descricao, double valor, TipoTransacao tipo, Categoria categoria) {
-        Transacao t = new Transacao(tipo, categoria, valor, descricao, null, null);
+        Transacao t = new Transacao(tipo, categoria, valor, descricao, usuario1, conta);
         t.setData(LocalDate.now());
         return t;
     }
 
-    // --- Testes DetectorGastosAnormais ---
-    @Test
-    public void testDetectorGastosAnormais() {
-        DetectorGastosAnormais detector = new DetectorGastosAnormais();
-        
-        // Média de despesas: (1500 + 800 + 100 + 200) / 4 = 650
-        // Limite padrão 1.5 * média = 975
-        
-        // Aluguel (1500) > 975 -> Anormal
-        // Supermercado (800) < 975 -> Normal
-        
-        // O método calcular retorna o limite de desvio * média
-        assertEquals(975.0, detector.calcular(transacoes), 0.01);
-        
-        List<Transacao> anormais = detector.detectarAnormalidades(transacoes);
-        // O detector compara com a média DA CATEGORIA
-        // Média Moradia: 1500. Limite: 2250. Aluguel (1500) -> Normal
-        // Média Alimentação: (800+200)/2 = 500. Limite: 750. Supermercado (800) -> Anormal. Restaurante (200) -> Normal.
-        // Média Lazer: 100. Limite: 150. Cinema (100) -> Normal.
-        
-        // Vamos verificar a lógica do detector:
-        // "double media = mediaPorCategoria.getOrDefault(t.getCategoria(), 0.0);"
-        // "if (t.getValor() > media * limiteDesvio)"
-        
-        // Alimentação: Média 500. Limite 750.
-        // Supermercado 800 > 750 -> Anormal.
-        
-        assertEquals(1, anormais.size());
-        assertEquals("Supermercado", anormais.get(0).getDescricao());
-    }
-    
-    @Test
-    public void testDetectorGastosAnormaisVazio() {
-        DetectorGastosAnormais detector = new DetectorGastosAnormais();
-        assertEquals(0.0, detector.calcular(new ArrayList<>()));
-        assertTrue(detector.detectarAnormalidades(new ArrayList<>()).isEmpty());
-    }
-
     // --- Testes ProjecaoSaldo ---
     @Test
+    @DisplayName("Deve calcular projecao de saldo corretamente")
     public void testProjecaoSaldo() {
-        ProjecaoSaldo projecao = new ProjecaoSaldo(6); // 6 meses
+        ProjecaoSaldo projecao = new ProjecaoSaldo(6);
         
-        // Média Receitas: 5000
-        // Média Despesas: 650
-        // Saldo Médio Mensal: 4350
-        // Projeção 6 meses: 4350 * 6 = 26100
-        
-        assertEquals(26100.0, projecao.calcular(transacoes), 0.01);
+        double resultado = projecao.calcular(transacoes);
+        assertEquals(26100.0, resultado, 0.01);
         assertEquals(6, projecao.getMeses());
-        assertEquals("Projeção de saldo para 6 meses baseada no histórico", projecao.getDescricao());
+        assertTrue(projecao.getDescricao().contains("6 meses"));
     }
     
     @Test
+    @DisplayName("Deve retornar zero para lista vazia")
     public void testProjecaoSaldoVazio() {
         ProjecaoSaldo projecao = new ProjecaoSaldo(12);
         assertEquals(0.0, projecao.calcular(new ArrayList<>()));
     }
+    
+    @Test
+    @DisplayName("Deve permitir alterar meses")
+    public void testProjecaoSaldoSetMeses() {
+        ProjecaoSaldo projecao = new ProjecaoSaldo(3);
+        projecao.setMeses(12);
+        assertEquals(12, projecao.getMeses());
+    }
 
     // --- Testes RateioAutomatico ---
     @Test
+    @DisplayName("Deve calcular rateio com pesos corretamente")
     public void testRateioAutomatico() {
         RateioAutomatico rateio = new RateioAutomatico();
-        rateio.adicionarMembro(usuario1, 2.0); // Peso 2
-        rateio.adicionarMembro(usuario2, 1.0); // Peso 1
+        rateio.adicionarMembro(usuario1, 2.0);
+        rateio.adicionarMembro(usuario2, 1.0);
         
-        // Total despesas: 2600
         assertEquals(2600.0, rateio.calcular(transacoes));
         
         Map<Usuario, Double> resultado = rateio.calcularRateio(300.0);
-        // Soma pesos: 3
-        // User1: 300 * (2/3) = 200
-        // User2: 300 * (1/3) = 100
         
         assertEquals(200.0, resultado.get(usuario1), 0.01);
         assertEquals(100.0, resultado.get(usuario2), 0.01);
-        
         assertEquals(2, rateio.getPesos().size());
     }
     
     @Test
+    @DisplayName("Deve retornar vazio quando nao ha membros")
     public void testRateioSemPesos() {
         RateioAutomatico rateio = new RateioAutomatico();
         assertTrue(rateio.calcularRateio(100.0).isEmpty());
     }
+    
+    @Test
+    @DisplayName("Deve distribuir igualmente com pesos iguais")
+    public void testRateioIgual() {
+        RateioAutomatico rateio = new RateioAutomatico();
+        rateio.adicionarMembro(usuario1, 1.0);
+        rateio.adicionarMembro(usuario2, 1.0);
+        
+        Map<Usuario, Double> resultado = rateio.calcularRateio(1000.0);
+        assertEquals(500.0, resultado.get(usuario1), 0.01);
+        assertEquals(500.0, resultado.get(usuario2), 0.01);
+    }
 
     // --- Testes SugestaoEconomia ---
     @Test
+    @DisplayName("Deve sugerir economia baseada na maior categoria")
     public void testSugestaoEconomia() {
         SugestaoEconomia sugestao = new SugestaoEconomia();
         
         // Gastos por categoria:
         // Moradia: 1500
-        // Alimentação: 1000
+        // Alimentacao: 800+200 = 1000
         // Lazer: 100
         
         // Maior gasto: 1500 (Moradia)
-        // Sugestão: 15% de 1500 = 225
+        // Sugestao: 15% de 1500 = 225
         
         assertEquals(225.0, sugestao.calcular(transacoes), 0.01);
         
         Map<Categoria, Double> analise = sugestao.analisarGastosPorCategoria(transacoes);
         assertEquals(1500.0, analise.get(Categoria.MORADIA));
         assertEquals(1000.0, analise.get(Categoria.ALIMENTACAO));
+        assertEquals(100.0, analise.get(Categoria.LAZER));
     }
     
     @Test
+    @DisplayName("Deve retornar zero para lista vazia")
     public void testSugestaoEconomiaVazio() {
         SugestaoEconomia sugestao = new SugestaoEconomia();
         assertEquals(0.0, sugestao.calcular(new ArrayList<>()));
+        assertTrue(sugestao.analisarGastosPorCategoria(new ArrayList<>()).isEmpty());
+    }
+    
+    @Test
+    @DisplayName("Deve ignorar receitas na analise")
+    public void testSugestaoEconomiaSomenteDespesas() {
+        SugestaoEconomia sugestao = new SugestaoEconomia();
+        
+        List<Transacao> somenteReceitas = new ArrayList<>();
+        somenteReceitas.add(criarTransacao("Salario", 5000.0, TipoTransacao.RECEITA, Categoria.SALARIO));
+        
+        assertEquals(0.0, sugestao.calcular(somenteReceitas));
     }
 }

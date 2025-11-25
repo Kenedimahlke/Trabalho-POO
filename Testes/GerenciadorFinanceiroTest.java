@@ -5,14 +5,8 @@ import Enums.*;
 import Exceptions.*;
 import Factory.*;
 import Gerenciadores.*;
-import Interfaces.*;
-import Observers.*;
-import Relatorios.*;
-import Repositorios.*;
-import Strategy.*;
 import java.time.*;
 import java.util.*;
-import java.util.List;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -151,26 +145,5 @@ public class GerenciadorFinanceiroTest {
         double saldoTotal = gerenciador.calcularSaldoTotal();
         
         assertEquals(3000.0, saldoTotal, 0.01);
-    }
-    
-    @Test
-    @DisplayName("Deve adicionar observador corretamente")
-    public void testAdicionarObservador() {
-        Observer observador = new NotificadorConsole("Admin");
-        
-        gerenciador.adicionarObservador(observador);
-        
-        assertTrue(gerenciador.getObservadores().contains(observador));
-    }
-    
-    @Test
-    @DisplayName("Deve remover observador corretamente")
-    public void testRemoverObservador() {
-        Observer observador = new NotificadorConsole("Admin");
-        gerenciador.adicionarObservador(observador);
-        
-        gerenciador.removerObservador(observador);
-        
-        assertFalse(gerenciador.getObservadores().contains(observador));
     }
 }

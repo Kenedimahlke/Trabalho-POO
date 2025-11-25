@@ -3,6 +3,8 @@ package Entidades;
 import Enums.*;
 import Exceptions.*;
 import Interfaces.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.*;
 import java.time.LocalDate;
@@ -10,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 // Classe que representa uma meta financeira
-public class Meta implements Serializable {
+public class Meta implements Serializable, Calculavel, Exportavel {
     private static final long serialVersionUID = 1L;
     private String nome;
     private Categoria categoria;
@@ -127,4 +129,34 @@ public class Meta implements Serializable {
     public void setNome(String nome) { this.nome = nome; }
     public void setValorAlvo(double valorAlvo) { this.valorAlvo = valorAlvo; }
     public void setPrazo(LocalDate prazo) { this.prazo = prazo; }
+
+    // IMPLEMENTAÇÃO DE INTERFACES
+    @Override
+    public double calcular() {
+        return getPercentualConcluido();
+    }
+
+    @Override
+    public String getDescricaoCalculo() {
+        return "Percentual de conclusão da meta";
+    }
+
+    @Override
+    public String exportarParaTexto() {
+        return toString();
+    }
+
+    @Override
+    public void salvarEmArquivo(String caminho) {
+        try (FileWriter writer = new FileWriter(caminho)) {
+            writer.write(exportarParaTexto());
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar meta em arquivo: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String getFormatoExportacao() {
+        return "TEXTO";
+    }
 }

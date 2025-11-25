@@ -5,10 +5,10 @@ import Enums.*;
 import Exceptions.*;
 import Factory.*;
 import Gerenciadores.*;
-import Interfaces.*;
-import Observers.*;
+
+
 import Relatorios.*;
-import Repositorios.*;
+
 import Strategy.*;
 import java.time.*;
 import java.util.*;

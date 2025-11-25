@@ -3,15 +3,14 @@ package Strategy;
 import Entidades.*;
 import Enums.*;
 import Exceptions.*;
-import Interfaces.*;
 import java.time.*;
 import java.util.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// Estratégia para rateio automático de despesas entre membros de um grupo
-public class RateioAutomatico implements EstrategiaCalculo {
+// Estrategia para rateio automatico de despesas entre membros de um grupo
+public class RateioAutomatico {
     private Map<Usuario, Double> pesos;
     
     public RateioAutomatico() {
@@ -22,7 +21,6 @@ public class RateioAutomatico implements EstrategiaCalculo {
         pesos.put(usuario, peso);
     }
     
-    @Override
     public double calcular(List<Transacao> transacoes) {
         // Calcula o total de despesas compartilhadas
         return transacoes.stream()
@@ -31,9 +29,8 @@ public class RateioAutomatico implements EstrategiaCalculo {
             .sum();
     }
     
-    @Override
     public String getDescricao() {
-        return "Rateio automático de despesas com pesos personalizados";
+        return "Rateio automatico de despesas com pesos personalizados";
     }
     
     // Calcula quanto cada membro deve pagar

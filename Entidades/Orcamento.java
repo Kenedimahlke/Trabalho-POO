@@ -3,6 +3,8 @@ package Entidades;
 import Enums.*;
 import Exceptions.*;
 import Interfaces.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.*;
 import java.time.LocalDate;
@@ -10,7 +12,7 @@ import java.time.YearMonth;
 import java.util.*;
 
 // Classe que representa um orçamento para controlar limites por categoria
-public class Orcamento implements Serializable {
+public class Orcamento implements Serializable, Calculavel, Exportavel {
     private static final long serialVersionUID = 1L;
     private String nome;
     private Categoria categoria;
@@ -147,5 +149,35 @@ public class Orcamento implements Serializable {
             throw new IllegalArgumentException("Percentual deve estar entre 0 e 1");
         }
         this.percentualAlerta = percentualAlerta;
+    }
+
+    // IMPLEMENTAÇÃO DE INTERFACES
+    @Override
+    public double calcular() {
+        return getPercentualGasto();
+    }
+
+    @Override
+    public String getDescricaoCalculo() {
+        return "Percentual gasto do orçamento";
+    }
+
+    @Override
+    public String exportarParaTexto() {
+        return gerarRelatorio();
+    }
+
+    @Override
+    public void salvarEmArquivo(String caminho) {
+        try (FileWriter writer = new FileWriter(caminho)) {
+            writer.write(exportarParaTexto());
+        } catch (IOException e) {
+            System.err.println("Erro ao salvar orçamento em arquivo: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public String getFormatoExportacao() {
+        return "TEXTO";
     }
 }

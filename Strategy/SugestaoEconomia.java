@@ -3,17 +3,15 @@ package Strategy;
 import Entidades.*;
 import Enums.*;
 import Exceptions.*;
-import Interfaces.*;
 import java.time.*;
 import java.util.*;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// Estratégia para sugerir economia baseada nos gastos por categoria
-public class SugestaoEconomia implements EstrategiaCalculo {
+// Estrategia para sugerir economia baseada nos gastos por categoria
+public class SugestaoEconomia {
     
-    @Override
     public double calcular(List<Transacao> transacoes) {
         if (transacoes.isEmpty()) {
             return 0.0;
@@ -36,9 +34,8 @@ public class SugestaoEconomia implements EstrategiaCalculo {
             .orElse(0.0) * 0.15;
     }
     
-    @Override
     public String getDescricao() {
-        return "Sugestão de economia de 15% da categoria com maior gasto";
+        return "Sugestao de economia de 15% da categoria com maior gasto";
     }
     
     public Map<Categoria, Double> analisarGastosPorCategoria(List<Transacao> transacoes) {

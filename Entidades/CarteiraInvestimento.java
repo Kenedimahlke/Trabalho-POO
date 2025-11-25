@@ -31,9 +31,9 @@ public class CarteiraInvestimento implements ContaFinanceira, Serializable {
     
     private double calcularRentabilidade(String tipo) {
         return switch (tipo.toLowerCase()) {
-            case "conservador" -> 0.5;  // 0.5% ao mês
-            case "moderado" -> 1.0;     // 1.0% ao mês
-            case "arrojado" -> 2.0;     // 2.0% ao mês
+            case "conservador" -> 0.5;
+            case "moderado" -> 1.0;
+            case "arrojado" -> 2.0;
             default -> 0.0;
         };
     }
@@ -72,7 +72,6 @@ public class CarteiraInvestimento implements ContaFinanceira, Serializable {
         return this.saldo;
     }
     
-    // Aplica a rentabilidade da carteira
     public void aplicarRentabilidade() {
         if (ativa && saldo > 0) {
             double valorRentabilidade = saldo * (rentabilidade / 100);
@@ -119,7 +118,6 @@ public class CarteiraInvestimento implements ContaFinanceira, Serializable {
         return extrato.toString();
     }
     
-    // GETTERS adicionais
     public String getTipo() { return tipo; }
     public double getRentabilidade() { return rentabilidade; }
 }

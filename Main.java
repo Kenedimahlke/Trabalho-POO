@@ -3,10 +3,7 @@ import Enums.*;
 import Exceptions.*;
 import Factory.*;
 import Gerenciadores.*;
-import Interfaces.*;
-import Observers.*;
 import Relatorios.*;
-import Repositorios.*;
 import Strategy.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -16,16 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-// Classe principal com interface de console para o sistema financeiro
 public class Main {
     
     private static Scanner scanner = new Scanner(System.in);
     private static GerenciadorFinanceiro gerenciador = GerenciadorFinanceiro.getInstancia();
-    private static GerenciadorPersistencia persistencia = new GerenciadorPersistencia();
     private static GerenciadorRelatorios geradorRelatorios;
+    private static GerenciadorPersistencia persistencia = new GerenciadorPersistencia();
     
     public static void main(String[] args) {
-        configurarObservadores();
         carregarDados();
         
         System.out.println("╔═══════════════════════════════════════════════════════════════╗");
@@ -104,14 +99,14 @@ public class Main {
     
     private static void menuUsuarios() {
         System.out.println("\n" + "═".repeat(65));
-        System.out.println("                     GERENCIAR USUÁRIOS");
+        System.out.println("                    MENU USUARIOS");
         System.out.println("═".repeat(65));
-        System.out.println(" 1. Cadastrar Usuário Individual");
+        System.out.println(" 1. Cadastrar Usuario Individual");
         System.out.println(" 2. Cadastrar Grupo");
-        System.out.println(" 3. Listar Usuários");
+        System.out.println(" 3. Listar Usuarios");
         System.out.println(" 0. Voltar");
         System.out.println("═".repeat(65));
-        System.out.print("Escolha uma opção: ");
+        System.out.print("Escolha uma opcao: ");
         
         int opcao = lerOpcao();
         
@@ -128,7 +123,7 @@ public class Main {
             case 0:
                 return;
             default:
-                System.out.println("\n✗ Opção inválida!");
+                System.out.println("\nOpcao invalida!");
         }
     }
     
@@ -150,19 +145,19 @@ public class Main {
         
         switch (opcao) {
             case 1:
-                criarConta("corrente");
+                criarContaCorrente();
                 break;
             case 2:
-                criarConta("digital");
+                criarContaDigital();
                 break;
             case 3:
-                criarConta("credito");
+                criarCartaoCredito();
                 break;
             case 4:
-                criarConta("investimento");
+                criarCarteiraInvestimento();
                 break;
             case 5:
-                criarConta("cofrinho");
+                criarCofrinho();
                 break;
             case 6:
                 listarContas();
@@ -322,37 +317,29 @@ public class Main {
         System.out.println("\n" + "═".repeat(65));
         System.out.println("                  ALGORITMOS INTELIGENTES");
         System.out.println("═".repeat(65));
-        System.out.println(" 1. Simulação de Cenário");
-        System.out.println(" 2. Detecção de Gastos Anormais");
-        System.out.println(" 3. Sugestões de Economia");
-        System.out.println(" 4. Projeção de Saldo");
-        System.out.println(" 5. Rateio Automático");
+        System.out.println(" 1. Projecao de Saldo");
+        System.out.println(" 2. Rateio Automatico");
+        System.out.println(" 3. Sugestoes de Economia");
         System.out.println(" 0. Voltar");
         System.out.println("═".repeat(65));
-        System.out.print("Escolha uma opção: ");
+        System.out.print("Escolha uma opcao: ");
         
         int opcao = lerOpcao();
         
         switch (opcao) {
             case 1:
-                executarSimulacaoCenario();
+                projetarSaldo();
                 break;
             case 2:
-                detectarGastosAnormais();
+                executarRateioAutomatico();
                 break;
             case 3:
                 sugerirEconomias();
                 break;
-            case 4:
-                projetarSaldo();
-                break;
-            case 5:
-                executarRateioAutomatico();
-                break;
             case 0:
                 return;
             default:
-                System.out.println("\nOpção inválida!");
+                System.out.println("\nOpcao invalida!");
         }
     }
     
@@ -402,8 +389,6 @@ public class Main {
         }
     }
     
-    // ==================== IMPLEMENTAÇÃO DAS FUNCIONALIDADES ====================
-    
     private static void cadastrarUsuarioIndividual() {
         System.out.print("\nNome: ");
         String nome = scanner.nextLine();
@@ -417,7 +402,7 @@ public class Main {
         UsuarioIndividual usuario = new UsuarioIndividual(nome, cpf, email);
         gerenciador.adicionarUsuario(usuario);
         
-        System.out.println("\n✓ Usuário cadastrado com sucesso!");
+        System.out.println("\nUsuário cadastrado com sucesso!");
     }
     
     private static void cadastrarGrupo() {
@@ -450,19 +435,123 @@ public class Main {
         }
     }
     
-    private static void criarConta(String tipo) {
+    private static void criarContaCorrente() {
         Usuario titular = selecionarUsuario();
         if (titular == null) return;
         
         System.out.print("\nNúmero da Conta: ");
         String numero = scanner.nextLine();
         
+        System.out.print("Limite do Cheque Especial [Enter para R$ 500]: ");
+        String limiteStr = scanner.nextLine();
+        double limite = limiteStr.isEmpty() ? 500.0 : Double.parseDouble(limiteStr);
+        
         try {
-            ContaFinanceira conta = ContaFactory.criarConta(tipo, numero, titular);
+            ContaFinanceira conta = ContaFactory.criarConta("corrente", numero, titular, limite);
             gerenciador.adicionarConta(conta);
             System.out.println("\nConta criada com sucesso!");
         } catch (Exception e) {
             System.out.println("\nErro ao criar conta: " + e.getMessage());
+        }
+    }
+    
+    private static void criarContaDigital() {
+        Usuario titular = selecionarUsuario();
+        if (titular == null) return;
+        
+        System.out.print("\nNúmero da Conta: ");
+        String numero = scanner.nextLine();
+        
+        System.out.print("Rendimento mensal (%) [Enter para 0.5]: ");
+        String rendStr = scanner.nextLine();
+        double rendimento = rendStr.isEmpty() ? 0.5 : Double.parseDouble(rendStr);
+        
+        try {
+            ContaFinanceira conta = ContaFactory.criarConta("digital", numero, titular, rendimento);
+            gerenciador.adicionarConta(conta);
+            System.out.println("\nConta criada com sucesso!");
+        } catch (Exception e) {
+            System.out.println("\nErro ao criar conta: " + e.getMessage());
+        }
+    }
+    
+    private static void criarCartaoCredito() {
+        Usuario titular = selecionarUsuario();
+        if (titular == null) return;
+        
+        System.out.print("\nNúmero do Cartão: ");
+        String numero = scanner.nextLine();
+        
+        System.out.print("Limite (R$): ");
+        double limite = lerDouble();
+        
+        System.out.print("Dia do fechamento (1-28): ");
+        int diaFechamento = lerOpcao();
+        
+        System.out.print("Dia do vencimento (1-28): ");
+        int diaVencimento = lerOpcao();
+        
+        LocalDate fechamento = LocalDate.now().withDayOfMonth(diaFechamento);
+        LocalDate vencimento = LocalDate.now().withDayOfMonth(diaVencimento);
+        
+        try {
+            ContaFinanceira conta = ContaFactory.criarConta("credito", numero, titular, limite, fechamento, vencimento);
+            gerenciador.adicionarConta(conta);
+            System.out.println("\nCartão criado com sucesso!");
+        } catch (Exception e) {
+            System.out.println("\nErro ao criar cartão: " + e.getMessage());
+        }
+    }
+    
+    private static void criarCarteiraInvestimento() {
+        Usuario titular = selecionarUsuario();
+        if (titular == null) return;
+        
+        System.out.print("\nNúmero da Carteira: ");
+        String numero = scanner.nextLine();
+        
+        System.out.println("\nTipo de Investimento:");
+        System.out.println("1. Conservador (0.5% a.m.)");
+        System.out.println("2. Moderado (1.0% a.m.)");
+        System.out.println("3. Agressivo (2.0% a.m.)");
+        System.out.print("Escolha: ");
+        
+        int tipo = lerOpcao();
+        String tipoInv = switch(tipo) {
+            case 1 -> "Conservador";
+            case 2 -> "Moderado";
+            case 3 -> "Agressivo";
+            default -> "Conservador";
+        };
+        
+        try {
+            ContaFinanceira conta = ContaFactory.criarConta("investimento", numero, titular, tipoInv);
+            gerenciador.adicionarConta(conta);
+            System.out.println("\nCarteira criada com sucesso!");
+        } catch (Exception e) {
+            System.out.println("\nErro ao criar carteira: " + e.getMessage());
+        }
+    }
+    
+    private static void criarCofrinho() {
+        Usuario titular = selecionarUsuario();
+        if (titular == null) return;
+        
+        System.out.print("\nNúmero do Cofrinho: ");
+        String numero = scanner.nextLine();
+        
+        System.out.print("Objetivo: ");
+        String objetivo = scanner.nextLine();
+        
+        System.out.print("Meta (R$): ");
+        double meta = lerDouble();
+        
+        try {
+            ContaFinanceira conta = ContaFactory.criarConta("cofrinho", numero, titular, objetivo, meta);
+            gerenciador.adicionarConta(conta);
+            System.out.println("\nCofrinho criado com sucesso!");
+        } catch (Exception e) {
+            System.out.println("\nErro ao criar cofrinho: " + e.getMessage());
         }
     }
     
@@ -624,7 +713,7 @@ public class Main {
         String caminho = scanner.nextLine();
         
         transacoes.get(indice).adicionarAnexo(caminho);
-        System.out.println("\nnexo adicionado com sucesso!");
+        System.out.println("\nAnexo adicionado com sucesso!");
     }
     
     private static void criarMeta() {
@@ -692,7 +781,17 @@ public class Main {
     }
     
     private static void verificarStatusMetas() {
-        gerenciador.verificarAlertas();
+        List<Meta> metasAtrasadas = gerenciador.getMetasAtrasadas();
+        if (metasAtrasadas.isEmpty()) {
+            System.out.println("\nNenhuma meta atrasada!");
+        } else {
+            System.out.println("\n=== METAS ATRASADAS ===");
+            for (Meta meta : metasAtrasadas) {
+                System.out.printf("%s - Falta: R$ %.2f\n",
+                    meta.getDescricao(),
+                    meta.getValorAlvo() - meta.getValorAtual());
+            }
+        }
     }
     
     private static void criarOrcamento() {
@@ -739,30 +838,17 @@ public class Main {
     }
     
     private static void verificarStatusOrcamentos() {
-        gerenciador.verificarAlertas();
-    }
-    
-    private static void criarCofrinho() {
-        Usuario titular = selecionarUsuario();
-        if (titular == null) return;
-        
-        System.out.print("\nNúmero da Conta: ");
-        String numero = scanner.nextLine();
-        
-        System.out.print("Objetivo: ");
-        String objetivo = scanner.nextLine();
-        
-        System.out.print("Meta de Valor: R$ ");
-        double meta = lerDouble();
-        
-        System.out.print("Prazo (dias): ");
-        int dias = lerOpcao();
-        LocalDate prazo = LocalDate.now().plusDays(dias);
-        
-        Cofrinho cofrinho = new Cofrinho(numero, titular, objetivo, meta, prazo);
-        gerenciador.adicionarConta(cofrinho);
-        
-        System.out.println("\nCofrinho criado com sucesso!");
+        List<Orcamento> orcamentosEstourados = gerenciador.getOrcamentosEstourados();
+        if (orcamentosEstourados.isEmpty()) {
+            System.out.println("\nNenhum orcamento estourado!");
+        } else {
+            System.out.println("\n=== ORCAMENTOS ESTOURADOS ===");
+            for (Orcamento o : orcamentosEstourados) {
+                System.out.printf("%s - Excedido em R$ %.2f\n",
+                    o.getNome(),
+                    o.getValorUltrapassado());
+            }
+        }
     }
     
     private static void listarCofrinhos() {
@@ -837,77 +923,7 @@ public class Main {
         System.out.println("═".repeat(65));
     }
     
-    private static void executarSimulacaoCenario() {
-        System.out.println("\n" + "═".repeat(65));
-        System.out.println("                 SIMULAÇÃO DE CENÁRIO");
-        System.out.println("═".repeat(65));
-        System.out.println(" 1. Simular mudança em categoria específica");
-        System.out.println(" 2. Simular mudança global de gastos");
-        System.out.println(" 3. Simular nova despesa recorrente");
-        System.out.println(" 0. Voltar");
-        System.out.println("═".repeat(65));
-        System.out.print("Escolha uma opção: ");
-        
-        int opcao = lerOpcao();
-        
-        SimulacaoCenario simulador = new SimulacaoCenario();
-        List<Transacao> transacoes = gerenciador.getTransacoes();
-        
-        switch (opcao) {
-            case 1:
-                Categoria cat = selecionarCategoria();
-                if (cat == null) return;
-                
-                System.out.print("Saldo atual: R$ ");
-                double saldoAtual = lerDouble();
-                
-                System.out.print("Percentual de mudança (ex: 10 para +10%, -20 para -20%): ");
-                double perc = lerDouble();
-                
-                System.out.print("Meses para simular: ");
-                int meses = lerOpcao();
-                
-                var resultado1 = simulador.simularMudancaGastos(transacoes, saldoAtual, cat, perc, meses);
-                System.out.println(resultado1);
-                break;
-                
-            case 2:
-                System.out.print("Saldo atual: R$ ");
-                double saldo = lerDouble();
-                
-                System.out.print("Percentual de mudança global: ");
-                double percGlobal = lerDouble();
-                
-                System.out.print("Meses para simular: ");
-                int mesesGlobal = lerOpcao();
-                
-                var resultado2 = simulador.simularMudancaGlobal(transacoes, saldo, percGlobal, mesesGlobal);
-                System.out.println(resultado2);
-                break;
-                
-            case 3:
-                System.out.print("Saldo atual: R$ ");
-                double saldoNovo = lerDouble();
-                
-                System.out.print("Valor da nova despesa mensal: R$ ");
-                double valorMensal = lerDouble();
-                
-                System.out.print("Meses para simular: ");
-                int mesesNovo = lerOpcao();
-                
-                var resultado3 = simulador.simularNovaDespesa(transacoes, saldoNovo, valorMensal, mesesNovo);
-                System.out.println(resultado3);
-                break;
-        }
-    }
-    
-    private static void detectarGastosAnormais() {
-        DetectorGastosAnormais detector = new DetectorGastosAnormais();
-        List<Transacao> transacoes = gerenciador.getTransacoes();
-        
-        var resultado = detector.calcular(transacoes);
-        System.out.println("\n" + resultado);
-    }
+
     
     private static void sugerirEconomias() {
         SugestaoEconomia sugestao = new SugestaoEconomia();
@@ -1096,60 +1112,29 @@ public class Main {
         }
     }
     
-    // ==================== MÉTODOS AUXILIARES ====================
-    
-    private static void configurarObservadores() {
-        gerenciador.adicionarObservador(new NotificadorConsole("Sistema"));
-        gerenciador.adicionarObservador(new NotificadorEmail("admin@sistema.com"));
-        gerenciador.adicionarObservador(new NotificadorPush("Usuario Principal"));
-    }
-    
     private static void carregarDados() {
-        if (persistencia.existeDadosSalvos()) {
-            System.out.println("\nCarregando dados salvos...");
-            try {
-                var dados = persistencia.carregarDados();
-                
-                // Carrega dados no gerenciador
-                @SuppressWarnings("unchecked")
-                List<Usuario> usuarios = (List<Usuario>) dados.get("usuarios");
-                for (Usuario u : usuarios) {
-                    gerenciador.adicionarUsuario(u);
+        try {
+            persistencia.carregarDados(gerenciador);
+            System.out.println("\nDados carregados com sucesso.");
+            
+            // Processar recorrencias apos carregar
+            List<Transacao> recorrencias = gerenciador.processarRecorrencias();
+            if (!recorrencias.isEmpty()) {
+                System.out.println("\n--- Recorrencias Processadas ---");
+                for (Transacao t : recorrencias) {
+                    System.out.println("Gerada: " + t.getDescricao() + " - " + t.getData());
                 }
-                for (ContaFinanceira c : (List<ContaFinanceira>) dados.get("contas")) {
-                    gerenciador.adicionarConta(c);
-                }
-                for (Transacao t : (List<Transacao>) dados.get("transacoes")) {
-                    gerenciador.adicionarTransacao(t);
-                }
-                for (Meta m : (List<Meta>) dados.get("metas")) {
-                    gerenciador.adicionarMeta(m);
-                }
-                for (Orcamento o : (List<Orcamento>) dados.get("orcamentos")) {
-                    gerenciador.adicionarOrcamento(o);
-                }
-                
-                System.out.println("Dados carregados com sucesso!");
-                
-                // Processar recorrências após carregar
-                gerenciador.processarRecorrencias();
-                
-            } catch (Exception e) {
-                System.out.println("Erro ao carregar dados: " + e.getMessage());
             }
+        } catch (Exception e) {
+            System.out.println("\nNenhum dado salvo encontrado ou erro ao carregar: " + e.getMessage());
+            System.out.println("Iniciando com base de dados vazia.");
         }
     }
     
     private static void salvarDados() {
         try {
-            persistencia.salvarDados(
-                gerenciador.getUsuarios(),
-                gerenciador.getContas(),
-                gerenciador.getTransacoes(),
-                gerenciador.getMetas(),
-                gerenciador.getOrcamentos()
-            );
-            System.out.println("\nDados salvos com sucesso!");
+            persistencia.salvarDados(gerenciador);
+            System.out.println("\nDados salvos com sucesso.");
         } catch (Exception e) {
             System.out.println("\nErro ao salvar dados: " + e.getMessage());
         }

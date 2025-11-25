@@ -6,17 +6,16 @@ import Interfaces.*;
 import java.io.Serializable;
 import java.time.*;
 import java.util.*;
-import java.util.UUID;
 
 public abstract class Usuario implements Serializable {
     private static final long serialVersionUID = 1L;
+    private static int contadorId = 1;
     private String id;
     private String nome;
     private String email;
 
-// CONSTRUTOR
     protected Usuario(String nome, String email) {
-        this.id = UUID.randomUUID().toString();
+        this.id = String.valueOf(contadorId++);
         this.nome = nome;
         this.email = email;
     }

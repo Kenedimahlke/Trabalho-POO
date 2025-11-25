@@ -3,20 +3,18 @@ package Strategy;
 import Entidades.*;
 import Enums.*;
 import Exceptions.*;
-import Interfaces.*;
 import java.time.*;
 import java.util.*;
 import java.util.List;
 
-// Estratégia para projetar o saldo futuro baseado no histórico
-public class ProjecaoSaldo implements EstrategiaCalculo {
+// Estrategia para projetar o saldo futuro baseado no historico
+public class ProjecaoSaldo {
     private int meses;
     
     public ProjecaoSaldo(int meses) {
         this.meses = meses;
     }
     
-    @Override
     public double calcular(List<Transacao> transacoes) {
         if (transacoes.isEmpty()) {
             return 0.0;
@@ -38,9 +36,8 @@ public class ProjecaoSaldo implements EstrategiaCalculo {
         return saldoMedioMensal * meses;
     }
     
-    @Override
     public String getDescricao() {
-        return "Projeção de saldo para " + meses + " meses baseada no histórico";
+        return "Projecao de saldo para " + meses + " meses baseada no historico";
     }
     
     public int getMeses() {

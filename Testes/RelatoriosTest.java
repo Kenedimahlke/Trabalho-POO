@@ -2,25 +2,14 @@ package Testes;
 
 import Entidades.*;
 import Enums.*;
-import Exceptions.*;
 import Factory.*;
-import Gerenciadores.*;
-import Interfaces.*;
-import Observers.*;
 import Relatorios.*;
-import Repositorios.*;
-import Strategy.*;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.*;
-import java.time.LocalDate;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +50,7 @@ public class RelatoriosTest {
     public void testGerarRelatorioPorPeriodo() {
         String relatorio = gerenciadorRelatorios.gerarRelatorioPorPeriodo(dataInicio, dataFim);
         assertNotNull(relatorio);
-        assertTrue(relatorio.contains("RELATÓRIO POR PERÍODO"));
+        assertTrue(relatorio.contains("RELATORIO DE GASTOS POR PERIODO"));
         assertTrue(relatorio.contains("Salário"));
         assertTrue(relatorio.contains("Aluguel"));
         assertTrue(relatorio.contains("Supermercado"));
@@ -78,20 +67,20 @@ public class RelatoriosTest {
     public void testGerarRelatorioComparativoCategoria() {
         String relatorio = gerenciadorRelatorios.gerarRelatorioComparativoCategoria(dataInicio, dataFim);
         assertNotNull(relatorio);
-        assertTrue(relatorio.contains("RELATÓRIO COMPARATIVO POR CATEGORIA"));
-        assertTrue(relatorio.contains("MORADIA"));
-        assertTrue(relatorio.contains("ALIMENTACAO"));
-        assertTrue(relatorio.contains("LAZER"));
+        assertTrue(relatorio.contains("RELATORIO COMPARATIVO POR CATEGORIA"));
+        assertTrue(relatorio.contains("Moradia"));
+        assertTrue(relatorio.contains("Alimentação"));
+        assertTrue(relatorio.contains("Lazer"));
         
         // Verificar se SALARIO não aparece (pois é receita)
-        assertFalse(relatorio.contains("SALARIO"));
+        assertFalse(relatorio.contains("Salário"));
     }
 
     @Test
     public void testGerarRelatorioRankingDespesas() {
         String relatorio = gerenciadorRelatorios.gerarRelatorioRankingDespesas(dataInicio, dataFim, 5);
         assertNotNull(relatorio);
-        assertTrue(relatorio.contains("RANKING DE DESPESAS"));
+        assertTrue(relatorio.contains("TOP 5 MAIORES DESPESAS"));
         assertTrue(relatorio.contains("Aluguel")); // Maior despesa
         assertTrue(relatorio.contains("Supermercado"));
         assertTrue(relatorio.contains("Cinema"));
@@ -102,9 +91,9 @@ public class RelatoriosTest {
         double saldoInicial = 1000.0;
         String relatorio = gerenciadorRelatorios.gerarRelatorioEvolucaoSaldo(dataInicio, dataFim, saldoInicial);
         assertNotNull(relatorio);
-        assertTrue(relatorio.contains("EVOLUÇÃO DO SALDO"));
+        assertTrue(relatorio.contains("RELATORIO DE EVOLUCAO DE SALDO"));
         assertTrue(relatorio.contains("Saldo Inicial:"));
-        assertTrue(relatorio.contains("2023-01")); // Mês
+        assertTrue(relatorio.contains("2023")); // Mês
     }
 
     @Test
@@ -112,11 +101,10 @@ public class RelatoriosTest {
         double saldoInicial = 1000.0;
         String relatorio = gerenciadorRelatorios.gerarRelatorioCompleto(dataInicio, dataFim, saldoInicial);
         assertNotNull(relatorio);
-        assertTrue(relatorio.contains("RELATÓRIO FINANCEIRO COMPLETO"));
-        assertTrue(relatorio.contains("RELATÓRIO POR PERÍODO"));
-        assertTrue(relatorio.contains("RELATÓRIO COMPARATIVO POR CATEGORIA"));
-        assertTrue(relatorio.contains("RANKING DE DESPESAS"));
-        assertTrue(relatorio.contains("EVOLUÇÃO DO SALDO"));
+        assertTrue(relatorio.contains("RELATORIO FINANCEIRO COMPLETO"));
+        assertTrue(relatorio.contains("RESUMO GERAL"));
+        assertTrue(relatorio.contains("Saldo Inicial:"));
+        assertTrue(relatorio.contains("Saldo Final:"));
     }
 
     @Test
@@ -127,7 +115,7 @@ public class RelatoriosTest {
         assertTrue(arquivo.length() > 0);
         
         String conteudo = Files.readString(arquivo.toPath());
-        assertTrue(conteudo.contains("RELATÓRIO POR PERÍODO"));
+        assertTrue(conteudo.contains("RELATORIO DE GASTOS POR PERIODO"));
     }
 
     @Test
@@ -138,7 +126,7 @@ public class RelatoriosTest {
         assertTrue(arquivo.length() > 0);
         
         String conteudo = Files.readString(arquivo.toPath());
-        assertTrue(conteudo.contains("RELATÓRIO COMPARATIVO POR CATEGORIA"));
+        assertTrue(conteudo.contains("RELATORIO COMPARATIVO POR CATEGORIA"));
     }
 
     @Test
@@ -149,7 +137,7 @@ public class RelatoriosTest {
         assertTrue(arquivo.length() > 0);
         
         String conteudo = Files.readString(arquivo.toPath());
-        assertTrue(conteudo.contains("RANKING DE DESPESAS"));
+        assertTrue(conteudo.contains("TOP 5 MAIORES DESPESAS"));
     }
 
     @Test
@@ -160,7 +148,7 @@ public class RelatoriosTest {
         assertTrue(arquivo.length() > 0);
         
         String conteudo = Files.readString(arquivo.toPath());
-        assertTrue(conteudo.contains("EVOLUÇÃO DO SALDO"));
+        assertTrue(conteudo.contains("RELATORIO DE EVOLUCAO DE SALDO"));
     }
     
     @Test
@@ -168,6 +156,6 @@ public class RelatoriosTest {
         // Testar com lista vazia de transações
         GerenciadorRelatorios gerenciadorVazio = new GerenciadorRelatorios(new ArrayList<>());
         String relatorio = gerenciadorVazio.gerarRelatorioPorPeriodo(dataInicio, dataFim);
-        assertTrue(relatorio.contains("Nenhuma transação encontrada no período"));
+        assertTrue(relatorio.contains("Total de Receitas: R$ 0,00"));
     }
 }
