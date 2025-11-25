@@ -54,6 +54,19 @@ public class GerenciadorFinanceiro {
     }
     
     public void adicionarTransacao(Transacao transacao) {
+        // Atualiza o saldo da conta se a data for hoje ou passado
+        if (!transacao.getData().isAfter(LocalDate.now())) {
+            try {
+                if (transacao.getTipo() == TipoTransacao.RECEITA) {
+                    transacao.getContaOrigem().depositar(transacao.getValor());
+                } else if (transacao.getTipo() == TipoTransacao.DESPESA) {
+                    transacao.getContaOrigem().sacar(transacao.getValor());
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+
         transacoes.add(transacao);
         
         if (transacao.getTipo() == TipoTransacao.DESPESA) {

@@ -872,8 +872,9 @@ public class Main {
         
         for (int i = 0; i < cofrinhos.size(); i++) {
             Cofrinho c = cofrinhos.get(i);
-            System.out.printf("%d. %s | Saldo: R$ %.2f | Progresso: %.2f%%\n",
+            System.out.printf("%d. [Conta: %s] %s | Saldo: R$ %.2f | Progresso: %.2f%%\n",
                 i + 1,
+                c.getNumeroConta(),
                 c.getObjetivo(),
                 c.consultarSaldo(),
                 c.calcularProgressoMeta());
@@ -887,8 +888,42 @@ public class Main {
         System.out.print("\nValor: R$ ");
         double valor = lerDouble();
         
-        cofrinho.depositar(valor);
-        System.out.println("\nDepósito realizado com sucesso!");
+        System.out.println("\nOrigem do depósito:");
+        System.out.println("1. Depósito em Espécie (Dinheiro)");
+        System.out.println("2. Transferir de outra Conta");
+        System.out.print("Escolha: ");
+        int opcao = lerOpcao();
+        
+        try {
+            if (opcao == 2) {
+                System.out.println("\nSelecione a conta de origem:");
+                ContaFinanceira origem = selecionarConta();
+                
+                if (origem != null) {
+                    // Tenta sacar da conta origem
+                    boolean sacou = origem.sacar(valor);
+                    if (sacou) {
+                        cofrinho.depositar(valor);
+                        System.out.println("Valor transferido com sucesso da conta " + origem.getNumeroConta());
+                        
+                        // Registrar a transação
+                        Transacao t = new Transacao(TipoTransacao.TRANSFERENCIA, null, valor, 
+                            "Aplicação em Cofrinho: " + cofrinho.getObjetivo(), 
+                            origem.getTitular(), origem);
+                        t.setContaDestino(cofrinho);
+                        gerenciador.adicionarTransacao(t);
+                    }
+                } else {
+                    System.out.println("Conta origem inválida!");
+                }
+            } else {
+                // Depósito direto (espécie)
+                cofrinho.depositar(valor);
+                System.out.println("\nDepósito realizado com sucesso!");
+            }
+        } catch (Exception e) {
+            System.out.println("\nErro: " + e.getMessage());
+        }
     }
     
     private static void sacarCofrinho() {
@@ -898,12 +933,37 @@ public class Main {
         System.out.print("\nValor: R$ ");
         double valor = lerDouble();
         
+        System.out.println("\nDestino do saque:");
+        System.out.println("1. Saque em Espécie (Dinheiro)");
+        System.out.println("2. Transferir para outra Conta");
+        System.out.print("Escolha: ");
+        int opcao = lerOpcao();
+        
         try {
+            // Tenta realizar o saque do cofrinho primeiro
             boolean sucesso = cofrinho.sacar(valor);
+            
             if (sucesso) {
-                System.out.println("\nSaque realizado com sucesso!");
-            } else {
-                System.out.println("\nSaldo insuficiente!");
+                if (opcao == 2) {
+                    System.out.println("\nSelecione a conta de destino:");
+                    ContaFinanceira destino = selecionarConta();
+                    
+                    if (destino != null) {
+                        destino.depositar(valor);
+                        System.out.println("Valor transferido com sucesso para a conta " + destino.getNumeroConta());
+                        
+                        // Opcional: Registrar a transação de transferência no histórico
+                        Transacao t = new Transacao(TipoTransacao.TRANSFERENCIA, null, valor, 
+                            "Resgate Cofrinho: " + cofrinho.getObjetivo(), 
+                            cofrinho.getTitular(), cofrinho);
+                        t.setContaDestino(destino);
+                        gerenciador.adicionarTransacao(t);
+                        
+                    } else {
+                        System.out.println("Conta destino inválida! O valor foi mantido como saque em espécie.");
+                    }
+                }
+                System.out.println("\nOperação realizada com sucesso!");
             }
         } catch (Exception e) {
             System.out.println("\nErro: " + e.getMessage());
@@ -919,7 +979,13 @@ public class Main {
         System.out.println("Saldo Atual: R$ " + String.format("%.2f", cofrinho.consultarSaldo()));
         System.out.println("Meta: R$ " + String.format("%.2f", cofrinho.getMetaValor()));
         System.out.println("Progresso: " + String.format("%.2f%%", cofrinho.calcularProgressoMeta()));
-        System.out.println("Dias Restantes: " + cofrinho.calcularDiasRestantes());
+        
+        long dias = cofrinho.calcularDiasRestantes();
+        if (dias >= 0) {
+            System.out.println("Dias Restantes: " + dias);
+        } else {
+            System.out.println("Dias Restantes: Sem prazo definido");
+        }
         System.out.println("═".repeat(65));
     }
     
@@ -929,19 +995,58 @@ public class Main {
         SugestaoEconomia sugestao = new SugestaoEconomia();
         List<Transacao> transacoes = gerenciador.getTransacoes();
         
-        var resultado = sugestao.calcular(transacoes);
-        System.out.println("\n" + resultado);
+        double economiaSugerida = sugestao.calcular(transacoes);
+        
+        if (economiaSugerida <= 0) {
+             System.out.println("\nNão há dados suficientes de despesas para sugerir economias.");
+             return;
+        }
+        
+        java.util.Map<Categoria, Double> gastos = sugestao.analisarGastosPorCategoria(transacoes);
+        java.util.Map.Entry<Categoria, Double> maiorGasto = gastos.entrySet().stream()
+            .max(java.util.Map.Entry.comparingByValue())
+            .orElse(null);
+            
+        System.out.println("\n" + "═".repeat(65));
+        System.out.println("                  SUGESTÃO DE ECONOMIA");
+        System.out.println("═".repeat(65));
+        
+        if (maiorGasto != null) {
+             System.out.println("Categoria com maior gasto: " + maiorGasto.getKey().getNome());
+             System.out.println(String.format("Total gasto nesta categoria: R$ %.2f", maiorGasto.getValue()));
+             System.out.println("═".repeat(65));
+             System.out.println(String.format("SUGESTÃO: Se você reduzir 15%% destes gastos,\nvocê economizará R$ %.2f.", economiaSugerida));
+        }
+        System.out.println("═".repeat(65));
     }
     
     private static void projetarSaldo() {
-        List<Transacao> transacoes = gerenciador.getTransacoes();
+        System.out.println("\nSelecione a conta para projeção (ou 0 para todas):");
+        ContaFinanceira conta = selecionarConta();
+        
+        List<Transacao> transacoes;
+        if (conta != null) {
+            transacoes = gerenciador.getTransacoes().stream()
+                .filter(t -> t.getContaOrigem().equals(conta))
+                .collect(java.util.stream.Collectors.toList());
+            System.out.println("Projetando para a conta: " + conta.getNumeroConta());
+        } else {
+            transacoes = gerenciador.getTransacoes();
+            System.out.println("Projetando para TODAS as contas (Geral)");
+        }
         
         System.out.print("\nMeses para projetar: ");
         int meses = lerOpcao();
         
         ProjecaoSaldo projecao = new ProjecaoSaldo(meses);
         double resultado = projecao.calcular(transacoes);
-        System.out.println(String.format("\nSaldo projetado em %d meses: R$ %.2f", meses, resultado));
+        
+        double saldoAtual = (conta != null) ? conta.consultarSaldo() : 
+                           gerenciador.getContas().stream().mapToDouble(ContaFinanceira::consultarSaldo).sum();
+                           
+        System.out.println(String.format("\nSaldo Atual: R$ %.2f", saldoAtual));
+        System.out.println(String.format("Saldo Projetado em %d meses: R$ %.2f", meses, saldoAtual + resultado));
+        System.out.println("(Baseado na média histórica de receitas e despesas)");
     }
     
     private static void executarRateioAutomatico() {
@@ -1189,7 +1294,7 @@ public class Main {
     private static Cofrinho selecionarCofrinho() {
         listarCofrinhos();
         
-        System.out.print("\nNúmero do cofrinho: ");
+        System.out.print("\nSelecione o número da lista: ");
         int indice = lerOpcao() - 1;
         
         List<ContaFinanceira> contas = gerenciador.getContas();
